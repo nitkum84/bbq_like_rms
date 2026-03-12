@@ -28,10 +28,19 @@ class BlogController extends Controller {
         Blog::create($data);
         return redirect()->route('admin.blogs.index')->with('success','Blog post saved.');
     }
+    public function show(Blog $blog) {
+        return redirect()->route('admin.blogs.edit', $blog);
+    }
     public function edit(Blog $blog) { return view('admin.blogs.edit', compact('blog')); }
     public function update(Request $request, Blog $blog) {
-        $request->validate(['title'=>'required','content'=>'required','status'=>'required|in:draft,published']);
+        $request->validate([
+            'title'=>'required|string|max:200',
+            'content'=>'required|string',
+            'status'=>'required|in:draft,published',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:3072',
+        ]);
         $data = $request->only(['title','content','status','meta_title','meta_description']);
+        if ($blog->title !== $request->title) $data['slug'] = Blog::makeSlug($request->title);
         if ($blog->status === 'draft' && $request->status === 'published') $data['published_at'] = now();
         if ($request->hasFile('image')) {
             if ($blog->image) Storage::disk('public')->delete($blog->image);

@@ -23,6 +23,11 @@
                 <li><span class="dropdown-item-text small text-muted">{{ auth()->user()->email }}</span></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
+                    <a href="{{ route('admin.profile.edit') }}" class="dropdown-item">
+                        <i class="bi bi-person-circle me-2"></i>My Profile
+                    </a>
+                </li>
+                <li>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button class="dropdown-item text-danger" type="submit">

@@ -1,0 +1,6 @@
+@extends('admin.layouts.app')
+@section('title', 'Edit Enquiry')
+@section('content')
+<div class="page-header"><h1 class="page-title">Edit Enquiry</h1><a href="{{ route('admin.enquiries.show', $enquiry) }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a></div>
+<div class="row justify-content-center"><div class="col-lg-8"><div class="admin-card"><div class="admin-card-header"><h5>Enquiry Status</h5></div><div class="admin-card-body"><form action="{{ route('admin.enquiries.update', $enquiry) }}" method="POST">@csrf @method('PUT')<div class="mb-3"><label class="form-label">Status</label><select name="status" class="form-select"><option value="new" @selected(old('status',$enquiry->status)==='new')>New</option><option value="read" @selected(old('status',$enquiry->status)==='read')>Read</option><option value="resolved" @selected(old('status',$enquiry->status)==='resolved')>Resolved</option></select></div><div class="mb-3"><label class="form-label">Admin Reply</label><textarea name="admin_reply" class="form-control" rows="6">{{ old('admin_reply',$enquiry->admin_reply) }}</textarea></div><div class="d-flex gap-2"><button class="btn btn-primary" type="submit">Update Enquiry</button><a href="{{ route('admin.enquiries.index') }}" class="btn btn-outline-secondary">Cancel</a></div></form></div></div></div></div>
+@endsection

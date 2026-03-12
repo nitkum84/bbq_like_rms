@@ -11,7 +11,6 @@
     </a>
 </div>
 
-<!-- Filters -->
 <div class="admin-card mb-4">
     <div class="admin-card-body">
         <form class="row g-3 align-items-end">
@@ -42,8 +41,11 @@
             <thead>
                 <tr>
                     <th><input type="checkbox" id="selectAll" class="form-check-input"></th>
-                    <th>Image</th><th>Name</th><th>Category</th>
-                    <th>Available</th><th>Actions</th>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Available</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -51,27 +53,26 @@
                 <tr>
                     <td><input type="checkbox" class="form-check-input item-check" value="{{ $item->id }}"></td>
                     <td>
-                        <img src="{{ $item->image_url }}" alt="{{ $item->name }}"
-                            style="width:50px;height:50px;object-fit:cover;border-radius:8px;">
+                        <img src="{{ $item->image_url }}" alt="{{ $item->name }}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;">
                     </td>
                     <td>
                         <div class="fw-semibold">{{ $item->name }}</div>
-                        <div class="text-muted small">{{ Str::limit($item->description,60) }}</div>
+                        <div class="text-muted small">{{ Str::limit($item->description, 60) }}</div>
                     </td>
-                    <td>{{ $item->category->name ?? '—' }}</td>
+                    <td>{{ $item->category->name ?? '-' }}</td>
                     <td>
                         <div class="form-check form-switch mb-0">
-                            <input class="form-check-input" type="checkbox" {{ $item->is_available ? 'checked' : '' }}
-                                data-toggle-url="{{ route('admin.menu-items.toggle',$item->id) }}">
+                            <input class="form-check-input" type="checkbox" {{ $item->is_available ? 'checked' : '' }} data-toggle-url="{{ route('admin.menu-items.toggle', $item->id) }}">
                         </div>
                     </td>
                     <td>
                         <div class="d-flex gap-1">
-                            <a href="{{ route('admin.menu-items.edit',$item) }}" class="btn btn-icon btn-outline-primary btn-sm">
+                            <a href="{{ route('admin.menu-items.edit', $item) }}" class="btn btn-icon btn-outline-primary btn-sm">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <form action="{{ route('admin.menu-items.destroy',$item) }}" method="POST">
-                                @csrf @method('DELETE')
+                            <form action="{{ route('admin.menu-items.destroy', $item) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
                                 <button class="btn btn-icon btn-outline-danger btn-sm" data-confirm="Delete this item?">
                                     <i class="bi bi-trash"></i>
                                 </button>
@@ -85,11 +86,10 @@
             </tbody>
         </table>
     </div>
-    <!-- Bulk Actions -->
     <div class="px-4 py-3 border-top d-flex justify-content-between align-items-center">
         <form action="{{ route('admin.menu-items.bulk-toggle') }}" method="POST" id="bulkForm">
             @csrf
-            <input type="hidden" name="ids" id="bulkIds">
+            <div id="bulkIds"></div>
             <div class="d-flex gap-2 align-items-center">
                 <span class="text-muted small">Bulk:</span>
                 <button type="submit" name="action" value="enable" class="btn btn-sm btn-outline-success">Enable Selected</button>
@@ -108,10 +108,25 @@
 document.getElementById('selectAll').addEventListener('change', function() {
     document.querySelectorAll('.item-check').forEach(c => c.checked = this.checked);
 });
+
 document.getElementById('bulkForm').addEventListener('submit', function(e) {
     const ids = Array.from(document.querySelectorAll('.item-check:checked')).map(c => c.value);
-    if (!ids.length) { e.preventDefault(); alert('Please select at least one item.'); return; }
-    document.getElementById('bulkIds').value = JSON.stringify(ids);
+    if (!ids.length) {
+        e.preventDefault();
+        alert('Please select at least one item.');
+        return;
+    }
+
+    const bulkIds = document.getElementById('bulkIds');
+    bulkIds.innerHTML = '';
+
+    ids.forEach(id => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'ids[]';
+        input.value = id;
+        bulkIds.appendChild(input);
+    });
 });
 </script>
 @endpush

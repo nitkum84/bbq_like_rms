@@ -7,8 +7,14 @@ class DealsBundle extends Model {
     protected $table = 'deals_bundles';
     protected $fillable = ['name','type','description','discount_type','discount_percent','valid_from','valid_to','is_active'];
     protected $casts = ['valid_from'=>'date','valid_to'=>'date','is_active'=>'boolean'];
+    public function menuItems() {
+        return $this->belongsToMany(MenuItem::class, 'deals_bundle_menu_item', 'deals_bundle_id', 'menu_item_id')->withTimestamps();
+    }
     public function scopeActive($q) {
         return $q->where('is_active', true)->whereDate('valid_from','<=',today())->whereDate('valid_to','>=',today());
     }
     public function getIsExpiredAttribute(): bool { return $this->valid_to->lt(today()); }
+    public function getIsCurrentlyValidAttribute(): bool {
+        return $this->is_active && $this->valid_from->lte(today()) && $this->valid_to->gte(today());
+    }
 }

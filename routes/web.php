@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\{
+    ActivityLogController,
     BlogController,
     BookingController,
     DashboardController,
@@ -12,6 +13,7 @@ use App\Http\Controllers\Admin\{
     NotificationController,
     PricingRuleController,
     SettingController,
+    SystemLogController,
     TableController,
     TimeSlotController,
     UserController,
@@ -65,6 +67,7 @@ Route::prefix('admin-panel')->name('admin.')->middleware(['auth', 'admin'])->gro
 
     Route::resource('vouchers', VoucherController::class);
     Route::post('vouchers/{id}/assign', [VoucherController::class, 'assign'])->name('vouchers.assign');
+    Route::post('vouchers/bulk-generate', [VoucherController::class, 'bulkGenerate'])->name('vouchers.bulk-generate');
 
     Route::resource('users', UserController::class);
     Route::post('users/{id}/toggle', [UserController::class, 'toggle'])->name('users.toggle');
@@ -79,6 +82,15 @@ Route::prefix('admin-panel')->name('admin.')->middleware(['auth', 'admin'])->gro
     Route::post('notifications/send', [NotificationController::class, 'send'])->name('notifications.send');
     Route::get('notifications/logs', [NotificationController::class, 'logs'])->name('notifications.logs');
 
+    Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+    Route::get('activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
+    Route::get('system-logs', [SystemLogController::class, 'index'])->name('system-logs.index');
+
+    Route::get('my-profile', [\App\Http\Controllers\Admin\AdminProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('my-profile', [\App\Http\Controllers\Admin\AdminProfileController::class, 'update'])->name('profile.update');
+
     Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
+    Route::post('settings/test-email', [SettingController::class, 'testEmail'])->name('settings.test-email');
+    Route::post('settings/test-sms', [SettingController::class, 'testSms'])->name('settings.test-sms');
 });

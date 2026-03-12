@@ -106,7 +106,24 @@
                 </a>
             </li>
 
+            <li class="nav-section-title"><span>Monitoring</span></li>
+            <li class="nav-item">
+                <a href="{{ route('admin.activity-logs.index') }}" class="nav-link {{ request()->routeIs('admin.activity-logs.*') ? 'active' : '' }}">
+                    <i class="bi bi-clipboard-data"></i><span>Activity Logs</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('admin.system-logs.index') }}" class="nav-link {{ request()->routeIs('admin.system-logs.*') ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-text"></i><span>System Logs</span>
+                </a>
+            </li>
+
             <li class="nav-section-title"><span>System</span></li>
+            <li class="nav-item">
+                <a href="{{ route('admin.profile.edit') }}" class="nav-link {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">
+                    <i class="bi bi-person-circle"></i><span>My Profile</span>
+                </a>
+            </li>
             <li class="nav-item">
                 <a href="{{ route('admin.settings.index') }}" class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
                     <i class="bi bi-gear"></i><span>Settings</span>

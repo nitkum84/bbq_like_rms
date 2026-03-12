@@ -25,7 +25,8 @@ class MenuItemController extends Controller {
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
-        $data = $request->only(['category_id','name','description','is_available']);
+        $data = $request->only(['category_id','name','description']);
+        $data['is_available'] = $request->boolean('is_available');
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('menu-items','public');
         }
@@ -36,13 +37,18 @@ class MenuItemController extends Controller {
         $categories = MenuCategory::where('is_active',true)->get();
         return view('admin.menu-items.edit', compact('menuItem','categories'));
     }
+    public function show(MenuItem $menuItem) {
+        return redirect()->route('admin.menu-items.edit', $menuItem);
+    }
     public function update(Request $request, MenuItem $menuItem) {
         $request->validate([
             'category_id' => 'required|exists:menu_categories,id',
             'name' => 'required|string|max:150',
+            'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
-        $data = $request->only(['category_id','name','description','is_available']);
+        $data = $request->only(['category_id','name','description']);
+        $data['is_available'] = $request->boolean('is_available');
         if ($request->hasFile('image')) {
             if ($menuItem->image) \Storage::disk('public')->delete($menuItem->image);
             $data['image'] = $request->file('image')->store('menu-items','public');

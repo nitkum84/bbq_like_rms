@@ -1,0 +1,9 @@
+@php($user = $user ?? null)
+<div class="row g-3">
+    <div class="col-md-6"><label class="form-label">Name <span class="text-danger">*</span></label><input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $user?->name) }}" required>@error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+    <div class="col-md-6"><label class="form-label">Email <span class="text-danger">*</span></label><input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user?->email) }}" required>@error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+    <div class="col-md-6"><label class="form-label">Mobile</label><input type="text" name="mobile" class="form-control @error('mobile') is-invalid @enderror" value="{{ old('mobile', $user?->mobile) }}">@error('mobile')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+    <div class="col-md-6"><label class="form-label">{{ $user ? 'New Password' : 'Password' }} @if(! $user)<span class="text-danger">*</span>@endif</label><input type="password" name="password" class="form-control @error('password') is-invalid @enderror" {{ $user ? '' : 'required' }}>@error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+</div>
+<div class="mt-4"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="status" value="1" id="statusSwitch" {{ old('status', $user?->status ?? 1) ? 'checked' : '' }}><label class="form-check-label" for="statusSwitch">Active user</label></div></div>
+<div class="d-flex gap-2 mt-4"><button type="submit" class="btn btn-primary">{{ $submitLabel }}</button><a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary">Cancel</a></div>
