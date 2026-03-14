@@ -19,18 +19,11 @@ use App\Http\Controllers\Admin\{
     UserController,
     VoucherController
 };
+use App\Http\Controllers\Front\HomeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    if (! auth()->check()) {
-        return view('welcome');
-    }
-
-    return auth()->user()->hasRole('super-admin')
-        ? redirect()->route('admin.dashboard')
-        : redirect()->route('dashboard');
-})->name('home');
+Route::get('/', HomeController::class)->name('home');
 
 require __DIR__.'/auth.php';
 
