@@ -6,12 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 class Booking extends Model {
     protected $fillable = [
         'user_id','table_id','slot_id','booking_date','meal_type',
-        'veg_count','nonveg_count','guest_type','offer_applied','voucher_id',
+        'veg_count','nonveg_count','guest_type','booking_meta','offer_applied','voucher_id',
         'total_amount','status','confirmation_code','sms_sent','email_sent','admin_notes'
     ];
     protected $casts = [
         'booking_date' => 'date',
         'guest_type'   => 'array',
+        'booking_meta' => 'array',
         'offer_applied'=> 'boolean',
         'sms_sent'     => 'boolean',
         'email_sent'   => 'boolean',

@@ -815,3 +815,407 @@ body.sidebar-open {
         align-items: flex-start;
     }
 }
+
+.hero-home__booking-button,
+.service-card__action {
+    margin-top: 1.2rem;
+}
+
+.service-card--interactive {
+    position: relative;
+}
+
+.reservation-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    pointer-events: none;
+}
+
+.reservation-drawer.is-open {
+    pointer-events: auto;
+}
+
+.reservation-drawer__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(20, 8, 3, 0.56);
+    opacity: 0;
+    transition: opacity 220ms ease;
+}
+
+.reservation-drawer__panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: min(100%, 34rem);
+    height: 100%;
+    padding: 1rem;
+    overflow-y: auto;
+    background: linear-gradient(180deg, #fff9f3, #f8ede0);
+    transform: translateX(100%);
+    transition: transform 220ms ease;
+    box-shadow: -20px 0 60px rgba(31, 12, 5, 0.18);
+}
+
+.reservation-drawer.is-open .reservation-drawer__overlay {
+    opacity: 1;
+}
+
+.reservation-drawer.is-open .reservation-drawer__panel {
+    transform: translateX(0);
+}
+
+.reservation-drawer__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+}
+
+.reservation-drawer__top h2,
+.reservation-confirmation-card h1,
+.reservation-confirmation-card h2,
+.reservation-card__header h3 {
+    margin: 0;
+    font-family: "Bricolage Grotesque", sans-serif;
+}
+
+.reservation-drawer__top h2 {
+    font-size: 1.9rem;
+}
+
+.reservation-drawer__close {
+    border: 0;
+    background: transparent;
+    color: var(--front-muted);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.reservation-form__grid {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.reservation-card,
+.reservation-confirmation-card {
+    padding: 0.9rem;
+    border: 1px solid var(--front-line);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.82);
+}
+
+.reservation-card--summary {
+    background: linear-gradient(180deg, #33170a, #4a210f);
+    color: #fff8ef;
+}
+
+.reservation-card--summary .reservation-card__header p,
+.reservation-card--summary .reservation-summary dt {
+    color: rgba(255, 248, 239, 0.72);
+}
+
+.reservation-card__header h3 {
+    font-size: 1.05rem;
+}
+
+.reservation-card__header p,
+.reservation-field__hint,
+.reservation-price-panel p,
+.reservation-alert {
+    margin: 0.25rem 0 0;
+    color: var(--front-muted);
+    line-height: 1.45;
+    font-size: 0.9rem;
+}
+
+.reservation-field,
+.reservation-reschedule-form label {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: 0.75rem;
+}
+
+.reservation-field span,
+.reservation-reschedule-form span {
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.reservation-field input,
+.reservation-field textarea,
+.reservation-field select,
+.reservation-reschedule-form input,
+.reservation-reschedule-form select {
+    width: 100%;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid rgba(34, 19, 13, 0.16);
+    border-radius: 14px;
+    background: #fffdf8;
+    color: var(--front-ink);
+}
+
+.reservation-date-strip {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.45rem;
+}
+
+.reservation-toggle-group,
+.reservation-slot-grid,
+.reservation-food-grid {
+    display: grid;
+    gap: 0.55rem;
+}
+
+.reservation-toggle-group {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 0.25rem;
+    border-radius: 16px;
+    background: #f1ece5;
+}
+
+.reservation-slot-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.reservation-food-grid {
+    grid-template-columns: 1fr;
+}
+
+.reservation-date-chip,
+.reservation-toggle-group button,
+.reservation-slot,
+.reservation-food-option {
+    border: 1px solid rgba(34, 19, 13, 0.1);
+    background: #fff;
+    color: var(--front-ink);
+    cursor: pointer;
+}
+
+.reservation-date-chip {
+    display: grid;
+    gap: 0.1rem;
+    justify-items: center;
+    padding: 0.6rem 0.35rem;
+    border-radius: 16px;
+}
+
+.reservation-date-chip span,
+.reservation-date-chip small {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--front-muted);
+}
+
+.reservation-date-chip strong {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-size: 1rem;
+}
+
+.reservation-toggle-group button {
+    padding: 0.65rem 0.85rem;
+    border-radius: 12px;
+    font-weight: 800;
+}
+
+.reservation-date-chip.is-active,
+.reservation-toggle-group button.is-active,
+.reservation-slot.is-active,
+.reservation-food-option.is-active {
+    border-color: rgba(217, 72, 29, 0.6);
+    background: rgba(217, 72, 29, 0.1);
+    box-shadow: inset 0 0 0 1px rgba(217, 72, 29, 0.12);
+}
+
+.reservation-slot,
+.reservation-food-option {
+    border-radius: 14px;
+}
+
+.reservation-slot {
+    display: grid;
+    gap: 0.2rem;
+    justify-items: center;
+    min-height: 4.5rem;
+    padding: 0.7rem 0.4rem;
+    text-align: center;
+}
+
+.reservation-slot strong,
+.reservation-food-option strong,
+.reservation-price-panel strong,
+.reservation-summary dd,
+.reservation-detail-list strong {
+    font-family: "Bricolage Grotesque", sans-serif;
+}
+
+.reservation-slot small,
+.reservation-food-option small {
+    display: block;
+    color: var(--front-muted);
+    font-size: 0.74rem;
+}
+
+.reservation-slot[disabled] {
+    opacity: 0.48;
+    cursor: not-allowed;
+}
+
+.reservation-slot-empty {
+    grid-column: 1 / -1;
+    padding: 0.8rem 0.9rem;
+    border: 1px dashed rgba(34, 19, 13, 0.16);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.7);
+    color: var(--front-muted);
+    font-size: 0.84rem;
+    text-align: center;
+}
+
+.reservation-food-option {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.35rem 0.75rem;
+    align-items: center;
+    padding: 0.75rem 0.85rem;
+    text-align: left;
+}
+
+.reservation-food-option span {
+    display: block;
+    font-weight: 800;
+}
+
+.reservation-food-option small {
+    grid-column: 1 / -1;
+}
+
+.reservation-price-panel {
+    display: grid;
+    gap: 0.55rem;
+    margin-top: 0.75rem;
+    padding: 0.8rem;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #fff2df, #fffaf2);
+}
+
+.reservation-price-panel div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.reservation-summary {
+    display: grid;
+    gap: 0.7rem;
+    margin: 0;
+}
+
+.reservation-summary div,
+.reservation-detail-list li {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.85rem;
+}
+
+.reservation-summary dt,
+.reservation-detail-list span {
+    color: var(--front-muted);
+    font-size: 0.86rem;
+}
+
+.reservation-summary dd,
+.reservation-detail-list strong {
+    margin: 0;
+    text-align: right;
+    font-size: 0.95rem;
+}
+
+.reservation-submit {
+    width: 100%;
+    margin-top: 0.9rem;
+}
+
+.reservation-alert {
+    display: none;
+    padding: 0.7rem 0.85rem;
+    border-radius: 14px;
+    background: rgba(45, 90, 70, 0.12);
+    color: var(--front-forest);
+}
+
+.reservation-alert.is-visible,
+.reservation-alert--visible {
+    display: block;
+}
+
+.reservation-confirmation-page {
+    padding: 9rem 0 5rem;
+}
+
+.reservation-confirmation-page__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 1.25rem;
+}
+
+.reservation-confirmation-card--primary {
+    background: linear-gradient(180deg, #fff7ee, #ffe9d4);
+}
+
+.reservation-summary--confirmation {
+    margin-top: 1.2rem;
+}
+
+.reservation-detail-list {
+    display: grid;
+    gap: 0.75rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.reservation-confirmation-actions {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.reservation-confirmation-actions__button {
+    width: 100%;
+}
+
+.reservation-reschedule-form {
+    display: grid;
+    gap: 0.75rem;
+}
+
+@media (max-width: 1100px) {
+    .reservation-confirmation-page__grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .reservation-date-strip {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .reservation-slot-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .reservation-food-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .reservation-drawer__panel {
+        width: 100%;
+        padding: 0.85rem;
+    }
+}

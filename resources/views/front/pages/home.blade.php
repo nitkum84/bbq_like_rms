@@ -14,14 +14,14 @@
                             <h1>{{ $slide['title'] }}</h1>
                             <p class="hero-home__description">{{ $slide['description'] }}</p>
                             <div class="hero-home__cta">
-                                <a class="button button--solid" href="{{ $slide['primary_cta']['url'] }}">{{ $slide['primary_cta']['label'] }}</a>
+                                <button class="button button--solid" type="button" data-reservation-open>{{ $slide['primary_cta']['label'] }}</button>
                                 <a class="button button--ghost" href="{{ $slide['secondary_cta']['url'] }}">{{ $slide['secondary_cta']['label'] }}</a>
                             </div>
                         </div>
 
                         <div class="hero-home__booking-card">
-                            <p>Table booking CTA</p>
-                            <h2>Find the right dining slot before it disappears.</h2>
+                            <p>Reserve Table</p>
+                            <h2>Choose your slot, menu path, and pricing in one fast flow.</h2>
                             <ul>
                                 @foreach ($stats as $stat)
                                     <li>
@@ -30,6 +30,7 @@
                                     </li>
                                 @endforeach
                             </ul>
+                            <button class="button button--solid hero-home__booking-button" type="button" data-reservation-open>Reserve Table</button>
                         </div>
                     </div>
                 </article>
@@ -47,10 +48,10 @@
         <div class="container booking-cta__panel">
             <div>
                 <p class="section-kicker">Book Your Table</p>
-                <h2>Dining plans should feel immediate, not administrative.</h2>
-                <p>Move guests from discovery to reservation with a prominent action, visible offer hooks, and a cleaner brand journey than the current placeholder welcome page.</p>
+                <h2>Pick your slot, food preference, and price before you commit.</h2>
+                <p>Open the reservation sidebar to see live lunch and dinner availability, compare veg, non-veg, and package pricing, and confirm your booking with a clean summary.</p>
             </div>
-            <a class="button button--solid" href="#services">Start Reservation Flow</a>
+            <button class="button button--solid" type="button" data-reservation-open>Start Reservation</button>
         </div>
     </section>
 
@@ -63,12 +64,15 @@
 
             <div class="services-grid__items">
                 @foreach ($services as $service)
-                    <article class="service-card">
+                    <article class="service-card{{ $service['title'] === 'Reserve Table' ? ' service-card--interactive' : '' }}">
                         <div class="service-card__visual">
                             <img src="{{ $service['image'] }}" alt="{{ $service['title'] }}">
                         </div>
                         <h3>{{ $service['title'] }}</h3>
                         <p>{{ $service['description'] }}</p>
+                        @if ($service['title'] === 'Reserve Table')
+                            <button class="button button--ghost-dark service-card__action" type="button" data-reservation-open>Reserve Table</button>
+                        @endif
                     </article>
                 @endforeach
             </div>
@@ -125,7 +129,7 @@
                     <p class="section-kicker">Sizzling Deals</p>
                     <h2>Promotions should look current, selective, and easy to scan.</h2>
                 </div>
-                <a class="button button--solid" href="#">See All Offers</a>
+                <button class="button button--solid" type="button" data-reservation-open>Reserve With A Deal</button>
             </div>
 
             <div class="deals__grid">
@@ -164,4 +168,150 @@
             </div>
         </div>
     </section>
+
+    <div class="reservation-drawer" data-reservation-drawer aria-hidden="true">
+        <div class="reservation-drawer__overlay" data-reservation-close></div>
+        <aside class="reservation-drawer__panel" aria-label="Reservation sidebar">
+            <div class="reservation-drawer__top">
+                <div>
+                    <p class="section-kicker">Reserve Table</p>
+                    <h2>Book {{ $reservationBootstrap['restaurant']['name'] }}</h2>
+                </div>
+                <button class="reservation-drawer__close" type="button" data-reservation-close>Close</button>
+            </div>
+
+            <div class="reservation-alert" data-reservation-feedback></div>
+
+            <form class="reservation-form" method="POST" action="{{ $reservationBootstrap['storeUrl'] }}" data-reservation-form data-reservation-bootstrap='@json($reservationBootstrap)'>
+                @csrf
+                <input type="hidden" name="slot_id" value="">
+
+                <div class="reservation-form__grid">
+                    <section class="reservation-card">
+                        <div class="reservation-card__header">
+                            <h3>1. Plan your visit</h3>
+                            <p>Select the date, meal, and live slot availability.</p>
+                        </div>
+
+                        <label class="reservation-field">
+                            <span>Date</span>
+                            <input type="date" name="date" value="{{ $reservationBootstrap['defaultDate'] }}" min="{{ $reservationBootstrap['minDate'] }}" required>
+                        </label>
+
+                        <div class="reservation-field">
+                            <span>Meal</span>
+                            <div class="reservation-toggle-group" data-meal-toggle>
+                                <button type="button" class="is-active" data-meal-option="lunch">Lunch</button>
+                                <button type="button" data-meal-option="dinner">Dinner</button>
+                            </div>
+                            <input type="hidden" name="meal_type" value="{{ $reservationBootstrap['defaultMealType'] }}">
+                        </div>
+
+                        <div class="reservation-field">
+                            <span>Available slots</span>
+                            <div class="reservation-slot-grid" data-slot-list></div>
+                            <p class="reservation-field__hint">Live availability updates as you change date, meal, or guest count.</p>
+                        </div>
+                    </section>
+
+                    <section class="reservation-card">
+                        <div class="reservation-card__header">
+                            <h3>2. Guests and food</h3>
+                            <p>Choose guest count and the menu path you want priced.</p>
+                        </div>
+
+                        <label class="reservation-field">
+                            <span>Guests</span>
+                            <input type="number" name="guests" min="1" max="20" value="{{ $reservationBootstrap['defaultGuests'] }}" required>
+                        </label>
+
+                        <div class="reservation-field">
+                            <span>Food preference</span>
+                            <div class="reservation-food-grid" data-food-options></div>
+                            <input type="hidden" name="food_preference" value="{{ $reservationBootstrap['defaultFoodPreference'] }}">
+                        </div>
+
+                        <label class="reservation-field reservation-package-field" data-package-field hidden>
+                            <span>Package</span>
+                            <select name="deals_bundle_id" data-package-select>
+                                <option value="">Select a package</option>
+                            </select>
+                        </label>
+
+                        <div class="reservation-price-panel" data-price-panel>
+                            <div>
+                                <span>Price per guest</span>
+                                <strong data-price-per-guest>Rs. 0.00</strong>
+                            </div>
+                            <div>
+                                <span>Total amount</span>
+                                <strong data-total-price>Rs. 0.00</strong>
+                            </div>
+                            <p data-price-label>Pricing will appear here.</p>
+                        </div>
+                    </section>
+
+                    <section class="reservation-card">
+                        <div class="reservation-card__header">
+                            <h3>3. Contact details</h3>
+                            <p>We use these details for your confirmation.</p>
+                        </div>
+
+                        <label class="reservation-field">
+                            <span>Name</span>
+                            <input type="text" name="name" value="{{ old('name', auth()->user()?->name ?? '') }}" required>
+                        </label>
+
+                        <label class="reservation-field">
+                            <span>Email</span>
+                            <input type="email" name="email" value="{{ old('email', auth()->user()?->email ?? '') }}" required>
+                        </label>
+
+                        <label class="reservation-field">
+                            <span>Mobile</span>
+                            <input type="text" name="mobile" value="{{ old('mobile', auth()->user()?->mobile ?? '') }}" required>
+                        </label>
+
+                        <label class="reservation-field">
+                            <span>Special request</span>
+                            <textarea name="special_request" rows="3" placeholder="Birthday setup, accessibility note, seating preference...">{{ old('special_request') }}</textarea>
+                        </label>
+                    </section>
+
+                    <section class="reservation-card reservation-card--summary">
+                        <div class="reservation-card__header">
+                            <h3>4. Booking summary</h3>
+                            <p>Review everything before you confirm.</p>
+                        </div>
+
+                        <dl class="reservation-summary" data-summary>
+                            <div>
+                                <dt>Restaurant</dt>
+                                <dd data-summary-restaurant>{{ $reservationBootstrap['restaurant']['name'] }}</dd>
+                            </div>
+                            <div>
+                                <dt>Date & time</dt>
+                                <dd data-summary-datetime>Choose a date and slot</dd>
+                            </div>
+                            <div>
+                                <dt>Guests</dt>
+                                <dd data-summary-guests>{{ $reservationBootstrap['defaultGuests'] }} guests</dd>
+                            </div>
+                            <div>
+                                <dt>Food selection</dt>
+                                <dd data-summary-food>{{ ucfirst($reservationBootstrap['defaultFoodPreference']) }}</dd>
+                            </div>
+                            <div>
+                                <dt>Total</dt>
+                                <dd data-summary-total>Rs. 0.00</dd>
+                            </div>
+                        </dl>
+
+                        <button class="button button--solid reservation-submit" type="submit">Confirm Booking</button>
+                    </section>
+                </div>
+            </form>
+        </aside>
+    </div>
 @endsection
+

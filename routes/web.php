@@ -20,10 +20,16 @@ use App\Http\Controllers\Admin\{
     VoucherController
 };
 use App\Http\Controllers\Front\HomeController;
+use App\Http\Controllers\Front\ReservationController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
+Route::get('/reservations/quote', [ReservationController::class, 'quote'])->name('reservations.quote');
+Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
+Route::get('/reservations/{confirmationCode}', [ReservationController::class, 'show'])->name('reservations.show');
+Route::post('/reservations/{confirmationCode}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
+Route::post('/reservations/{confirmationCode}/reschedule', [ReservationController::class, 'reschedule'])->name('reservations.reschedule');
 
 require __DIR__.'/auth.php';
 

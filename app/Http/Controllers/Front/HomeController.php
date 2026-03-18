@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Front;
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
 use App\Models\WebsiteSetting;
+use App\Services\ReservationService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
@@ -12,6 +13,10 @@ use Illuminate\View\View;
 
 class HomeController extends Controller
 {
+    public function __construct(protected ReservationService $reservationService)
+    {
+    }
+
     public function __invoke(): View
     {
         $restaurantName = WebsiteSetting::get('restaurant_name', config('app.name', 'Restaurant Booking'));
@@ -83,7 +88,7 @@ class HomeController extends Controller
                 'title' => 'Best Restaurant for Celebrations in Town',
                 'description' => 'An indulgent grill-first dining experience with buffet theatre, festive add-ons, and occasion-ready tables.',
                 'image' => asset('images/hero-bg.jpg'),
-                'primary_cta' => ['label' => 'Book A Table', 'url' => '#booking-cta'],
+                'primary_cta' => ['label' => 'Reserve Table', 'url' => '#booking-cta'],
                 'secondary_cta' => ['label' => 'Explore Deals', 'url' => '#deals'],
             ],
             [
@@ -91,7 +96,7 @@ class HomeController extends Controller
                 'title' => 'Best Restaurant for Celebrations in Town',
                 'description' => 'Curated spreads, live counters, and shareable upgrades that turn casual plans into full events.',
                 'image' => asset('images/events-image.jpg'),
-                'primary_cta' => ['label' => 'Plan A Celebration', 'url' => '#services'],
+                'primary_cta' => ['label' => 'Reserve Table', 'url' => '#booking-cta'],
                 'secondary_cta' => ['label' => "What's On BBQ", 'url' => '#offerings'],
             ],
             [
@@ -99,7 +104,7 @@ class HomeController extends Controller
                 'title' => 'Best Restaurant for Celebrations in Town',
                 'description' => 'Keep the relationship warm between visits with prepaid value, exclusive access, and smarter gifting.',
                 'image' => asset('images/testimonials-image.jpg'),
-                'primary_cta' => ['label' => 'View Happiness Cards', 'url' => '#happiness-cards'],
+                'primary_cta' => ['label' => 'Reserve Table', 'url' => '#booking-cta'],
                 'secondary_cta' => ['label' => 'See Latest Updates', 'url' => '#updates'],
             ],
         ];
@@ -191,6 +196,19 @@ class HomeController extends Controller
             ['value' => '4 ways', 'label' => 'to experience the brand across dine-in, takeaway, catering, and cards'],
         ];
 
+        $defaultReservationDate = today()->toDateString();
+        $reservationBootstrap = [
+            'restaurant' => $this->reservationService->getRestaurantDetails(),
+            'foodOptions' => $this->reservationService->getFoodOptions(today()),
+            'defaultDate' => $defaultReservationDate,
+            'quoteUrl' => route('reservations.quote'),
+            'storeUrl' => route('reservations.store'),
+            'minDate' => $defaultReservationDate,
+            'defaultMealType' => 'lunch',
+            'defaultGuests' => 2,
+            'defaultFoodPreference' => 'veg',
+        ];
+
         return view('front.pages.home', [
             'restaurantName' => $restaurantName,
             'primaryNavigation' => $primaryNavigation,
@@ -202,6 +220,7 @@ class HomeController extends Controller
             'blogs' => $blogs,
             'stats' => $stats,
             'profileUrl' => $profileUrl,
+            'reservationBootstrap' => $reservationBootstrap,
         ]);
     }
 }
