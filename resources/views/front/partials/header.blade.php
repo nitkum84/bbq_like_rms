@@ -1,4 +1,11 @@
 <header class="front-header" id="top">
+    <div class="front-header__topbar">
+        <div class="container front-header__topbar-inner">
+            <p>Unlimited grill experiences, celebration tables, and curated buffet moments.</p>
+            <button class="front-header__topbar-cta" type="button" data-reservation-open>Book Your Table</button>
+        </div>
+    </div>
+
     <div class="container front-header__inner">
         <a class="front-header__brand" href="{{ route('home') }}" aria-label="Restaurant homepage">
             <img src="{{ asset('images/logo.svg') }}" alt="Restaurant logo">

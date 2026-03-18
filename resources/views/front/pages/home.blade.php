@@ -7,28 +7,38 @@
     <section class="hero-home">
         <div class="hero-home__backdrop">
             @foreach ($heroSlides as $index => $slide)
-                <article class="hero-home__slide{{ $index === 0 ? ' is-active' : '' }}" data-hero-slide style="background-image: linear-gradient(100deg, rgba(28, 13, 5, 0.88), rgba(28, 13, 5, 0.28)), url('{{ $slide['image'] }}')">
+                <article class="hero-home__slide{{ $index === 0 ? ' is-active' : '' }}" data-hero-slide>
                     <div class="container hero-home__content">
-                        <div>
+                        <div class="hero-home__copy">
                             <p class="section-kicker">{{ $slide['eyebrow'] }}</p>
                             <h1>{{ $slide['title'] }}</h1>
                             <p class="hero-home__description">{{ $slide['description'] }}</p>
+
                             <div class="hero-home__cta">
                                 <button class="button button--solid" type="button" data-reservation-open>{{ $slide['primary_cta']['label'] }}</button>
-                                <a class="button button--ghost" href="{{ $slide['secondary_cta']['url'] }}">{{ $slide['secondary_cta']['label'] }}</a>
+                                <a class="button button--ghost-dark" href="{{ $slide['secondary_cta']['url'] }}">{{ $slide['secondary_cta']['label'] }}</a>
+                            </div>
+
+                            <div class="hero-home__metrics">
+                                @foreach ($stats as $stat)
+                                    <article class="hero-home__metric">
+                                        <strong>{{ $stat['value'] }}</strong>
+                                        <span>{{ $stat['label'] }}</span>
+                                    </article>
+                                @endforeach
                             </div>
                         </div>
 
                         <div class="hero-home__booking-card">
+                            <div class="hero-home__booking-visual">
+                                <img src="{{ $slide['image'] }}" alt="{{ $slide['title'] }}">
+                            </div>
                             <p>Reserve Table</p>
                             <h2>Choose your slot, menu path, and pricing in one fast flow.</h2>
-                            <ul>
-                                @foreach ($stats as $stat)
-                                    <li>
-                                        <strong>{{ $stat['value'] }}</strong>
-                                        <span>{{ $stat['label'] }}</span>
-                                    </li>
-                                @endforeach
+                            <ul class="hero-home__booking-points">
+                                <li>Live lunch and dinner slot availability</li>
+                                <li>Veg, non-veg, and package pricing in one place</li>
+                                <li>Fast confirmation with summary before payment</li>
                             </ul>
                             <button class="button button--solid hero-home__booking-button" type="button" data-reservation-open>Reserve Table</button>
                         </div>
@@ -44,12 +54,29 @@
         </div>
     </section>
 
+    <section class="home-ribbon">
+        <div class="container home-ribbon__grid">
+            <article>
+                <span>Buffet + Live Grill</span>
+                <p>Designed for family outings, birthdays, office lunches, and weekend plans.</p>
+            </article>
+            <article>
+                <span>Rewards + Gifting</span>
+                <p>Promote happiness cards and member-led repeat visits higher on the page.</p>
+            </article>
+            <article>
+                <span>Flexible Booking Flow</span>
+                <p>Reservations stay front and center without feeling like a utility widget.</p>
+            </article>
+        </div>
+    </section>
+
     <section class="booking-cta" id="booking-cta">
         <div class="container booking-cta__panel">
             <div>
                 <p class="section-kicker">Book Your Table</p>
-                <h2>Pick your slot, food preference, and price before you commit.</h2>
-                <p>Open the reservation sidebar to see live lunch and dinner availability, compare veg, non-veg, and package pricing, and confirm your booking with a clean summary.</p>
+                <h2>Plan the visit before checkout with a cleaner, smarter reservation flow.</h2>
+                <p>Open the reservation panel to compare meal windows, guest pricing, and package options without leaving the homepage.</p>
             </div>
             <button class="button button--solid" type="button" data-reservation-open>Start Reservation</button>
         </div>
@@ -59,7 +86,7 @@
         <div class="container">
             <div class="section-heading">
                 <p class="section-kicker">Service Cards</p>
-                <h2>Four clear entry points for the most valuable user intents.</h2>
+                <h2>Quick entry points for the actions most guests care about first.</h2>
             </div>
 
             <div class="services-grid__items">
@@ -83,11 +110,11 @@
         <div class="container feature-strip__grid">
             <div class="feature-strip__content">
                 <p class="section-kicker">Happiness Cards</p>
-                <h2>Position prepaid dining as a premium reward product, not a buried utility page.</h2>
-                <p>Use the homepage to sell the benefit stack: gifting, stored value, member pricing, faster repeat visits, and better occasion planning.</p>
+                <h2>Give reward-led dining a premium spotlight on a lighter, more polished homepage.</h2>
+                <p>Use this section to sell gifting, stored value, faster repeat visits, member benefits, and occasion planning without pushing it into a secondary menu.</p>
                 <div class="feature-strip__actions">
                     <a class="button button--solid" href="#">Explore Card Options</a>
-                    <a class="button button--ghost button--ghost-dark" href="#">See Member Benefits</a>
+                    <a class="button button--ghost-dark" href="#">See Member Benefits</a>
                 </div>
             </div>
 
@@ -105,7 +132,7 @@
         <div class="container">
             <div class="section-heading">
                 <p class="section-kicker">Our Offerings</p>
-                <h2>The homepage flow mirrors a BBQN-style decision path without copying its design language.</h2>
+                <h2>Shape the middle of the homepage like a modern restaurant showcase, not a plain list of links.</h2>
             </div>
 
             <div class="offerings__grid">
@@ -127,7 +154,7 @@
             <div class="section-heading section-heading--split">
                 <div>
                     <p class="section-kicker">Sizzling Deals</p>
-                    <h2>Promotions should look current, selective, and easy to scan.</h2>
+                    <h2>Promotions should feel active, selective, and easy to compare at a glance.</h2>
                 </div>
                 <button class="button button--solid" type="button" data-reservation-open>Reserve With A Deal</button>
             </div>
@@ -149,9 +176,9 @@
             <div class="section-heading section-heading--split">
                 <div>
                     <p class="section-kicker">Latest Updates</p>
-                    <h2>Use the blog layer to keep the homepage feeling active between campaigns.</h2>
+                    <h2>Keep the homepage feeling current between offers, events, and seasonal pushes.</h2>
                 </div>
-                <a class="button button--ghost button--ghost-dark" href="#">Visit Blog</a>
+                <a class="button button--ghost-dark" href="#">Visit Blog</a>
             </div>
 
             <div class="updates__grid">
@@ -314,4 +341,3 @@
         </aside>
     </div>
 @endsection
-
