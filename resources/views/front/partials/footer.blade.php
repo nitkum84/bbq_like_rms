@@ -1,39 +1,56 @@
 <footer class="front-footer" id="footer">
-    <div class="container front-footer__grid">
-        <div class="front-footer__brand">
-            <img src="{{ asset('images/logo.svg') }}" alt="Restaurant logo">
-            <p class="front-footer__eyebrow">Celebration-first dining</p>
-            <h2>A brighter homepage experience built for reservations, rewards, and repeat visits.</h2>
-            <p>Designed to feel closer to a modern restaurant brand landing page, while still connecting to your Laravel booking flow and future admin-driven content.</p>
-        </div>
+    @php
+        $frontLogo = \App\Models\WebsiteSetting::get('logo');
+        $facebookUrl = \App\Models\WebsiteSetting::get('facebook_url');
+        $instagramUrl = \App\Models\WebsiteSetting::get('instagram_url');
+        $mapsUrl = \App\Models\WebsiteSetting::get('google_maps_url');
+        $socialLinks = array_filter([
+            ['label' => 'Facebook', 'url' => $facebookUrl, 'icon' => 'f'],
+            ['label' => 'Instagram', 'url' => $instagramUrl, 'icon' => 'i'],
+            ['label' => 'Location', 'url' => $mapsUrl, 'icon' => 'm'],
+        ], fn ($item) => filled($item['url']));
+    @endphp
 
-        <div class="front-footer__nav">
-            <div class="front-footer__column">
-                <p class="front-footer__eyebrow">Explore</p>
-                <div class="front-footer__links">
+    <div class="container front-footer__frame">
+        <div class="front-footer__main">
+            <div class="front-footer__nav-panel">
+                <div class="front-footer__brand-mark">
+                    <img style="width: 100px;" src="{{ $frontLogo ? \Illuminate\Support\Facades\Storage::url($frontLogo) : asset('images/logo.svg') }}" alt="{{ $restaurantName ?? config('app.name', 'Restaurant Booking') }} logo">
+                </div>
+
+                <div class="front-footer__link-groups">
                     @foreach ($sidebarSections as $section)
-                        @foreach ($section['items'] as $item)
-                            <a href="{{ $item['url'] }}">{{ $item['label'] }}</a>
-                        @endforeach
+                        <section class="front-footer__group" aria-label="{{ $section['title'] }}">
+                            <h3>{{ $section['title'] }}</h3>
+                            <div class="front-footer__links">
+                                @foreach ($section['items'] as $item)
+                                    <a href="{{ $item['url'] }}">{{ $item['label'] }}</a>
+                                @endforeach
+                            </div>
+                        </section>
                     @endforeach
                 </div>
             </div>
+        </div>
 
-            <div class="front-footer__column">
-                <p class="front-footer__eyebrow">Plan Your Visit</p>
-                <div class="front-footer__contact">
-                    <p>Reservations, private dining, catering, and reward-led visits from one homepage flow.</p>
-                    <button class="button button--solid front-footer__button" type="button" data-reservation-open>Reserve Table</button>
+        @if (! empty($socialLinks))
+            <div class="front-footer__meta">
+                <div class="front-footer__socials" aria-label="Social links">
+                    @foreach ($socialLinks as $social)
+                        <a href="{{ $social['url'] }}" target="_blank" rel="noreferrer" aria-label="{{ $social['label'] }}">
+                            <span>{{ strtoupper($social['icon']) }}</span>
+                        </a>
+                    @endforeach
                 </div>
             </div>
-        </div>
-    </div>
+        @endif
 
-    <div class="container front-footer__bottom">
-        <div class="front-footer__legal">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms & Conditions</a>
+        <div class="front-footer__bottom">
+            <p>&copy; All Rights Reserved by {{ $restaurantName ?? config('app.name', 'Restaurant Booking') }}</p>
+            <div class="front-footer__legal">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Term &amp; Conditions</a>
+            </div>
         </div>
-        <p>Copyright &copy; {{ now()->year }} {{ $restaurantName ?? config('app.name', 'Restaurant Booking') }}. All rights reserved.</p>
     </div>
 </footer>

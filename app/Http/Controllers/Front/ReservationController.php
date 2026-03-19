@@ -287,7 +287,7 @@ class ReservationController extends Controller
             'profileUrl' => $profileUrl,
             'primaryNavigation' => [
                 ['label' => 'Home', 'url' => route('home')],
-                ['label' => "What's On BBQ", 'url' => route('home').'#offerings'],
+                ['label' => "What's On {$restaurantName}", 'url' => route('home').'#offerings'],
                 ['label' => 'Deals', 'url' => route('home').'#deals'],
                 ['label' => 'Reservations', 'url' => route('home').'#booking-cta'],
             ],

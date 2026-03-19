@@ -8,7 +8,7 @@
 
     <div class="container front-header__inner">
         <a class="front-header__brand" href="{{ route('home') }}" aria-label="Restaurant homepage">
-            <img src="{{ asset('images/logo.svg') }}" alt="Restaurant logo">
+            <img src="{{ ($frontLogo = \App\Models\WebsiteSetting::get('logo')) ? \Illuminate\Support\Facades\Storage::url($frontLogo) : asset('images/logo.svg') }}" alt="{{ $restaurantName ?? config('app.name', 'Restaurant Booking') }} logo">
         </a>
 
         <nav class="front-header__nav" aria-label="Primary navigation">

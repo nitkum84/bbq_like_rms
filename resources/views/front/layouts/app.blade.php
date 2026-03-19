@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', ($restaurantName ?? config('app.name', 'Restaurant Booking')))</title>
     <meta name="description" content="@yield('meta_description', 'Restaurant booking and dining experience homepage.')">
-    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
+    <link rel="icon" href="{{ ($frontLogo = \App\Models\WebsiteSetting::get('logo')) ? \Illuminate\Support\Facades\Storage::url($frontLogo) : asset('images/favicon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">

@@ -2,7 +2,7 @@
     <div class="front-sidebar__overlay" data-sidebar-close></div>
     <div class="front-sidebar__panel">
         <div class="front-sidebar__top">
-            <img src="{{ asset('images/footer-logo.svg') }}" alt="Restaurant footer logo">
+            <img src="{{ ($frontLogo = \App\Models\WebsiteSetting::get('logo')) ? \Illuminate\Support\Facades\Storage::url($frontLogo) : asset('images/footer-logo.svg') }}" alt="{{ $restaurantName ?? config('app.name', 'Restaurant Booking') }} logo">
             <button type="button" class="front-sidebar__close" data-sidebar-close aria-label="Close menu">Close</button>
         </div>
 

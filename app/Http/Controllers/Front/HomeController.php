@@ -20,64 +20,70 @@ class HomeController extends Controller
     public function __invoke(): View
     {
         $restaurantName = WebsiteSetting::get('restaurant_name', config('app.name', 'Restaurant Booking'));
+        $homeUrl = route('home');
         $profileUrl = Route::has('login') ? route('login') : '#';
+        $frontDashboardUrl = null;
 
         if (Auth::check()) {
             $profileUrl = Auth::user()->hasRole('super-admin')
                 ? route('admin.dashboard')
                 : route('dashboard');
+
+            if (! Auth::user()->hasRole('super-admin')) {
+                $frontDashboardUrl = route('dashboard');
+            }
         }
 
         $primaryNavigation = [
-            ['label' => 'Happiness Cards', 'url' => '#happiness-cards'],
-            ['label' => "What's On BBQ", 'url' => '#offerings'],
-            ['label' => 'Deals', 'url' => '#deals'],
-            ['label' => 'Restaurants', 'url' => '#booking-cta'],
+            ['label' => 'Happiness Cards', 'url' => $homeUrl.'#happiness-cards'],
+            ['label' => "What's On {$restaurantName}", 'url' => $homeUrl.'#offerings'],
+            ['label' => 'Deals', 'url' => $homeUrl.'#deals'],
+            ['label' => 'Restaurants', 'url' => $homeUrl.'#booking-cta'],
         ];
 
         $sidebarSections = [
             [
                 'title' => 'Main',
                 'items' => [
-                    ['label' => $restaurantName, 'url' => route('home')],
-                    ['label' => 'Home', 'url' => route('home')],
-                    ['label' => "What's On BBQN", 'url' => '#offerings'],
-                    ['label' => 'Deals', 'url' => '#deals'],
-                    ['label' => 'Delivery / Takeaway', 'url' => '#services'],
-                    ['label' => 'Restaurants', 'url' => '#booking-cta'],
-                    ['label' => 'Happiness Cards', 'url' => '#happiness-cards'],
-                    ['label' => 'Catering', 'url' => '#services'],
+                    ['label' => $restaurantName, 'url' => $homeUrl],
+                    ['label' => 'Home', 'url' => $homeUrl],
+                    ['label' => "What's On {$restaurantName}", 'url' => $homeUrl.'#offerings'],
+                    ['label' => 'Deals', 'url' => $homeUrl.'#deals'],
+                    ['label' => 'Delivery / Takeaway', 'url' => $homeUrl.'#services'],
+                    ['label' => 'Restaurants', 'url' => $homeUrl.'#booking-cta'],
+                    ['label' => 'Happiness Cards', 'url' => $homeUrl.'#happiness-cards'],
+                    ['label' => 'Catering', 'url' => $homeUrl.'#services'],
                 ],
             ],
             [
                 'title' => 'Profile',
                 'items' => [
                     ['label' => 'Profile', 'url' => $profileUrl],
-                    ['label' => 'My Reservations', 'url' => '#booking-cta'],
-                    ['label' => 'My Profile', 'url' => $profileUrl],
-                    ['label' => 'My Smiles', 'url' => '#happiness-cards'],
-                    ['label' => 'My Happiness Card', 'url' => '#happiness-cards'],
-                    ['label' => 'Delivery History', 'url' => '#services'],
+                    ['label' => 'My Reservations', 'url' => $frontDashboardUrl ? $frontDashboardUrl.'#reservations' : $homeUrl.'#booking-cta'],
+                    ['label' => 'My Profile', 'url' => $frontDashboardUrl ? $frontDashboardUrl.'#profile' : $profileUrl],
+                    ['label' => 'My Smiles', 'url' => $homeUrl.'#happiness-cards'],
+                    ['label' => 'My Happiness Card', 'url' => $homeUrl.'#happiness-cards'],
+                    ['label' => 'Delivery History', 'url' => $homeUrl.'#services'],
                 ],
             ],
             [
                 'title' => 'About',
                 'items' => [
-                    ['label' => 'About Us', 'url' => '#footer'],
-                    ['label' => 'Blogs', 'url' => '#updates'],
-                    ['label' => 'Smiles', 'url' => '#happiness-cards'],
-                    ['label' => 'News', 'url' => '#updates'],
-                    ['label' => 'Nutrition Information', 'url' => '#offerings'],
+                    ['label' => 'About Us', 'url' => $homeUrl.'#footer'],
+                    ['label' => 'Blogs', 'url' => $homeUrl.'#updates'],
+                    ['label' => 'Smiles', 'url' => $homeUrl.'#happiness-cards'],
+                    ['label' => 'News', 'url' => $homeUrl.'#updates'],
+                    ['label' => 'Nutrition Information', 'url' => $homeUrl.'#offerings'],
                 ],
             ],
             [
                 'title' => 'Others',
                 'items' => [
-                    ['label' => 'Contact Us', 'url' => '#footer'],
-                    ['label' => 'FAQ', 'url' => '#footer'],
-                    ['label' => 'Corporate Enquiry', 'url' => '#services'],
-                    ['label' => 'Investor Relations', 'url' => '#footer'],
-                    ['label' => 'Barbeque Nation Partnership', 'url' => '#services'],
+                    ['label' => 'Contact Us', 'url' => $homeUrl.'#footer'],
+                    ['label' => 'FAQ', 'url' => $homeUrl.'#footer'],
+                    ['label' => 'Corporate Enquiry', 'url' => $homeUrl.'#services'],
+                    ['label' => 'Investor Relations', 'url' => $homeUrl.'#footer'],
+                    ['label' => 'Barbeque Nation Partnership', 'url' => $homeUrl.'#services'],
                 ],
             ],
         ];
@@ -97,7 +103,7 @@ class HomeController extends Controller
                 'description' => 'Curated spreads, live counters, and shareable upgrades that turn casual plans into full events.',
                 'image' => asset('images/events-image.jpg'),
                 'primary_cta' => ['label' => 'Reserve Table', 'url' => '#booking-cta'],
-                'secondary_cta' => ['label' => "What's On BBQ", 'url' => '#offerings'],
+                'secondary_cta' => ['label' => "What's On {$restaurantName}", 'url' => '#offerings'],
             ],
             [
                 'eyebrow' => 'Rewards That Return',

@@ -156,7 +156,7 @@ class ProfileController extends Controller
                     'title' => 'Restaurant',
                     'items' => [
                         ['label' => 'Home', 'url' => route('home')],
-                        ['label' => "What's On BBQ", 'url' => route('home').'#offerings'],
+                        ['label' => "What's On {$restaurantName}", 'url' => route('home').'#offerings'],
                         ['label' => 'Deals', 'url' => route('home').'#deals'],
                         ['label' => 'Contact', 'url' => route('home').'#footer'],
                     ],

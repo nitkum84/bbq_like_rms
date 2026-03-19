@@ -62,18 +62,18 @@
                 </div>
             @else
                 <div class="user-dashboard-grid">
-                    <aside class="user-dashboard-sidebar">
-                        <a href="#profile">My Profile</a>
-                        <a href="#reservations">Reservations</a>
-                        <a href="#rewards">Rewards</a>
+                    <aside class="user-dashboard-sidebar" data-dashboard-tabs role="tablist" aria-label="Dashboard sections">
+                        <button type="button" id="dashboard-tab-profile" data-dashboard-tab="profile" role="tab" aria-controls="profile" aria-selected="true">My Profile</button>
+                        <button type="button" id="dashboard-tab-reservations" data-dashboard-tab="reservations" role="tab" aria-controls="reservations" aria-selected="false">Reservations</button>
+                        <button type="button" id="dashboard-tab-rewards" data-dashboard-tab="rewards" role="tab" aria-controls="rewards" aria-selected="false">Rewards</button>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit">Logout</button>
                         </form>
                     </aside>
 
-                    <div class="user-dashboard-content">
-                        <section class="user-dashboard-panel" id="profile">
+                    <div class="user-dashboard-content" data-dashboard-panels>
+                        <section class="user-dashboard-panel" id="profile" data-dashboard-panel="profile" role="tabpanel" aria-labelledby="dashboard-tab-profile">
                             <div class="user-dashboard-panel__header">
                                 <div>
                                     <p class="section-kicker">Profile</p>
@@ -119,7 +119,7 @@
                             </dl>
                         </section>
 
-                        <section class="user-dashboard-panel" id="reservations">
+                        <section class="user-dashboard-panel" id="reservations" data-dashboard-panel="reservations" role="tabpanel" aria-labelledby="dashboard-tab-reservations" hidden>
                             <div class="user-dashboard-panel__header">
                                 <div>
                                     <p class="section-kicker">Reservations</p>
@@ -134,7 +134,7 @@
                                         <div class="user-dashboard-booking-card__top">
                                             <div>
                                                 <strong>{{ $booking->confirmation_code }}</strong>
-                                                <p>{{ $booking->booking_date?->format('D, d M Y') }} · {{ $booking->slot?->slot_label }}</p>
+                                                <p>{{ $booking->booking_date?->format('D, d M Y') }} &middot; {{ $booking->slot?->slot_label }}</p>
                                             </div>
                                             <span class="user-dashboard-status is-{{ $booking->status }}">{{ ucfirst($booking->status) }}</span>
                                         </div>
@@ -164,7 +164,7 @@
                             </div>
                         </section>
 
-                        <section class="user-dashboard-panel" id="rewards">
+                        <section class="user-dashboard-panel" id="rewards" data-dashboard-panel="rewards" role="tabpanel" aria-labelledby="dashboard-tab-rewards" hidden>
                             <div class="user-dashboard-panel__header">
                                 <div>
                                     <p class="section-kicker">Rewards</p>
@@ -196,4 +196,5 @@
         </div>
     </section>
 @endsection
+
 

@@ -22,6 +22,69 @@ if (sidebar && openButton) {
     });
 }
 
+const dashboardTabList = document.querySelector('[data-dashboard-tabs]');
+const dashboardTabs = Array.from(document.querySelectorAll('[data-dashboard-tab]'));
+const dashboardPanels = Array.from(document.querySelectorAll('[data-dashboard-panel]'));
+
+if (dashboardTabList && dashboardTabs.length > 0 && dashboardPanels.length > 0) {
+    const validTabIds = new Set(dashboardTabs.map((tab) => tab.dataset.dashboardTab));
+    const fallbackTabId = dashboardTabs[0].dataset.dashboardTab;
+
+    const setActiveDashboardTab = (tabId, updateHash = true) => {
+        const activeTabId = validTabIds.has(tabId) ? tabId : fallbackTabId;
+
+        dashboardTabs.forEach((tab) => {
+            const isActive = tab.dataset.dashboardTab === activeTabId;
+            tab.classList.toggle('is-active', isActive);
+            tab.setAttribute('aria-selected', String(isActive));
+            tab.tabIndex = isActive ? 0 : -1;
+        });
+
+        dashboardPanels.forEach((panel) => {
+            panel.hidden = panel.dataset.dashboardPanel !== activeTabId;
+        });
+
+        if (updateHash && window.location.hash !== `#${activeTabId}`) {
+            window.history.replaceState(null, '', `#${activeTabId}`);
+        }
+    };
+
+    const getHashTab = () => window.location.hash.replace('#', '');
+
+    dashboardTabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+            setActiveDashboardTab(tab.dataset.dashboardTab);
+        });
+
+        tab.addEventListener('keydown', (event) => {
+            const currentIndex = dashboardTabs.indexOf(tab);
+            let nextIndex = currentIndex;
+
+            if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+                nextIndex = (currentIndex + 1) % dashboardTabs.length;
+            } else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+                nextIndex = (currentIndex - 1 + dashboardTabs.length) % dashboardTabs.length;
+            } else if (event.key === 'Home') {
+                nextIndex = 0;
+            } else if (event.key === 'End') {
+                nextIndex = dashboardTabs.length - 1;
+            } else {
+                return;
+            }
+
+            event.preventDefault();
+            dashboardTabs[nextIndex].focus();
+            setActiveDashboardTab(dashboardTabs[nextIndex].dataset.dashboardTab);
+        });
+    });
+
+    window.addEventListener('hashchange', () => {
+        setActiveDashboardTab(getHashTab(), false);
+    });
+
+    setActiveDashboardTab(getHashTab(), false);
+}
+
 const slides = Array.from(document.querySelectorAll('[data-hero-slide]'));
 const dots = Array.from(document.querySelectorAll('[data-hero-dot]'));
 
@@ -377,3 +440,4 @@ rescheduleForms.forEach((form) => {
     mealSelect.addEventListener('change', refreshSlots);
     refreshSlots();
 });
+
