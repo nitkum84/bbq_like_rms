@@ -30,15 +30,15 @@ Route::post('/reservations', [ReservationController::class, 'store'])->name('res
 Route::get('/reservations/{confirmationCode}', [ReservationController::class, 'show'])->name('reservations.show');
 Route::post('/reservations/{confirmationCode}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
 Route::post('/reservations/{confirmationCode}/reschedule', [ReservationController::class, 'reschedule'])->name('reservations.reschedule');
+Route::post('/reservations/{confirmationCode}/dashboard-otp', [ReservationController::class, 'verifyDashboardOtp'])->name('reservations.dashboard-otp.verify');
+Route::post('/reservations/{confirmationCode}/dashboard-otp/resend', [ReservationController::class, 'resendDashboardOtp'])->name('reservations.dashboard-otp.resend');
 
 require __DIR__.'/auth.php';
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return request()->user()->hasRole('super-admin')
-            ? redirect()->route('admin.dashboard')
-            : view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [ProfileController::class, 'dashboard'])->name('dashboard');
+    Route::post('/dashboard/otp', [ProfileController::class, 'verifyDashboardOtp'])->name('dashboard.otp.verify');
+    Route::post('/dashboard/otp/resend', [ProfileController::class, 'resendDashboardOtp'])->name('dashboard.otp.resend');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

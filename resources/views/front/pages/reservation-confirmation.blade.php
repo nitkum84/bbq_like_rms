@@ -41,6 +41,32 @@
                         <dd>Rs. {{ number_format((float) $booking->total_amount, 2) }}</dd>
                     </div>
                 </dl>
+
+                <div class="reservation-dashboard-entry">
+                    <div>
+                        <h2>Go to your dashboard</h2>
+                        <p>We created your user dashboard from this booking. First-time users must confirm the same OTP sent to both email and SMS.</p>
+                    </div>
+
+                    @if (auth()->check() && auth()->id() === $booking->user_id && session('front_otp_passed', false))
+                        <a class="button button--solid reservation-confirmation-actions__button" href="{{ route('dashboard') }}">Open Dashboard</a>
+                    @else
+                        <form method="POST" action="{{ route('reservations.dashboard-otp.verify', $booking->confirmation_code) }}" class="reservation-dashboard-entry__form">
+                            @csrf
+                            <label>
+                                <span>Enter OTP</span>
+                                <input type="text" name="otp" inputmode="numeric" maxlength="6" placeholder="6-digit OTP" required>
+                            </label>
+                            @error('reservation_otp')
+                                <p class="user-dashboard-error">{{ $message }}</p>
+                            @enderror
+                            <div class="reservation-dashboard-entry__actions">
+                                <button class="button button--solid" type="submit">Verify & Open Dashboard</button>
+                                <button class="button button--ghost-dark" formaction="{{ route('reservations.dashboard-otp.resend', $booking->confirmation_code) }}" formnovalidate type="submit">Resend OTP</button>
+                            </div>
+                        </form>
+                    @endif
+                </div>
             </div>
 
             <div class="reservation-confirmation-card">
@@ -92,5 +118,4 @@
         </div>
     </section>
 @endsection
-
 

@@ -25,6 +25,10 @@ class User extends Authenticatable {
     public function vouchers() { return $this->hasMany(Voucher::class, 'assigned_to_user_id'); }
     public function blogs() { return $this->hasMany(Blog::class, 'author_id'); }
 
+    public function hasVerifiedContact(): bool {
+        return filled($this->email_verified_at) && filled($this->mobile_verified_at);
+    }
+
     public function getProfileImageUrlAttribute() {
         return $this->profile_image
             ? asset('storage/'.$this->profile_image)

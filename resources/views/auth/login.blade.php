@@ -4,476 +4,242 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <title>Login - {{ \App\Models\WebsiteSetting::get('restaurant_name', config('app.name')) }}</title>
-
+    <title>User Login - {{ \App\Models\WebsiteSetting::get('restaurant_name', config('app.name')) }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="{{ asset('admin/css/admin.css') }}" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    @vite(['resources/css/front.css'])
     <style>
-        :root {
-            --auth-ink: #1f252b;
-            --auth-muted: #63707c;
-            --auth-cream: #f6efe8;
-            --auth-panel: rgba(255, 255, 255, 0.92);
-            --auth-line: rgba(44, 62, 80, 0.10);
-            --auth-shadow: 0 24px 80px rgba(36, 28, 21, 0.18);
-        }
-
-        * { box-sizing: border-box; }
-
-        body.auth-login-page {
-            margin: 0;
+        .front-login-page {
             min-height: 100vh;
-            font-family: 'Manrope', sans-serif;
-            color: var(--auth-ink);
+            margin: 0;
+            font-family: "Manrope", sans-serif;
+            color: var(--front-ink);
             background:
-                radial-gradient(circle at top left, rgba(230, 126, 34, 0.22), transparent 28%),
-                radial-gradient(circle at bottom left, rgba(192, 57, 43, 0.18), transparent 24%),
-                linear-gradient(135deg, #fcf8f3 0%, #f6efe8 44%, #fffdf9 100%);
+                radial-gradient(circle at top left, rgba(244, 199, 102, 0.22), transparent 24%),
+                radial-gradient(circle at bottom right, rgba(217, 74, 39, 0.14), transparent 26%),
+                linear-gradient(180deg, #fffdf8 0%, #f7f3ec 100%);
         }
 
-        .login-stage {
+        .front-login-shell {
+            width: min(calc(100% - 2rem), 1120px);
+            margin: 0 auto;
             min-height: 100vh;
             display: grid;
-            grid-template-columns: minmax(320px, 1.1fr) minmax(380px, 0.9fr);
-        }
-
-        .login-showcase {
-            position: relative;
-            overflow: hidden;
-            padding: 56px clamp(28px, 4vw, 72px);
-            background:
-                linear-gradient(180deg, rgba(44, 62, 80, 0.96), rgba(29, 41, 53, 0.96)),
-                linear-gradient(135deg, rgba(230, 126, 34, 0.18), transparent 60%);
-            color: #fff7f1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .login-showcase::before,
-        .login-showcase::after {
-            content: "";
-            position: absolute;
-            border-radius: 999px;
-            filter: blur(8px);
-            opacity: 0.28;
-        }
-
-        .login-showcase::before {
-            width: 260px;
-            height: 260px;
-            right: -60px;
-            top: -40px;
-            background: linear-gradient(135deg, var(--accent), transparent);
-        }
-
-        .login-showcase::after {
-            width: 340px;
-            height: 340px;
-            left: -80px;
-            bottom: -100px;
-            background: linear-gradient(135deg, rgba(192, 57, 43, 0.85), transparent);
-        }
-
-        .brand-chip {
-            position: relative;
-            z-index: 1;
-            display: inline-flex;
+            grid-template-columns: minmax(0, 1.1fr) minmax(340px, 430px);
+            gap: 1.5rem;
             align-items: center;
-            gap: 14px;
-            padding: 14px 18px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 18px;
-            background: rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(10px);
+            padding: 2rem 0;
         }
 
-        .brand-chip img,
-        .brand-badge {
-            width: 54px;
-            height: 54px;
-            border-radius: 16px;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-
-        .brand-badge {
-            display: grid;
-            place-items: center;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            color: white;
-            font-size: 1.4rem;
-            box-shadow: 0 14px 34px rgba(192, 57, 43, 0.28);
-        }
-
-        .brand-chip small {
-            display: block;
-            font-size: 0.74rem;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-            color: rgba(255, 247, 241, 0.66);
-        }
-
-        .brand-chip strong {
-            display: block;
-            font-size: 1rem;
-            font-weight: 800;
-            color: #fff7f1;
-        }
-
-        .showcase-copy {
-            position: relative;
-            z-index: 1;
-            max-width: 560px;
-            margin: 52px 0;
-        }
-
-        .showcase-copy h1 {
-            margin: 0 0 18px;
-            font-family: 'Fraunces', serif;
-            font-size: clamp(2.8rem, 5vw, 4.7rem);
-            line-height: 0.96;
-            letter-spacing: -0.04em;
-        }
-
-        .showcase-copy p {
-            margin: 0;
-            max-width: 470px;
-            font-size: 1.05rem;
-            line-height: 1.8;
-            color: rgba(255, 247, 241, 0.76);
-        }
-
-        .showcase-grid {
-            position: relative;
-            z-index: 1;
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 16px;
-            max-width: 620px;
-        }
-
-        .showcase-card {
-            padding: 18px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-        }
-
-        .showcase-card span {
-            display: block;
-            font-size: 0.78rem;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: rgba(255, 247, 241, 0.62);
-            margin-bottom: 8px;
-        }
-
-        .showcase-card strong {
-            display: block;
-            font-size: 1.55rem;
-            font-weight: 800;
-            margin-bottom: 6px;
-        }
-
-        .showcase-card p {
-            margin: 0;
-            font-size: 0.9rem;
-            color: rgba(255, 247, 241, 0.74);
-        }
-
-        .login-panel {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 32px;
-        }
-
-        .login-card {
-            width: min(100%, 480px);
-            background: var(--auth-panel);
-            border: 1px solid rgba(255, 255, 255, 0.65);
-            box-shadow: var(--auth-shadow);
-            border-radius: 30px;
-            padding: 34px;
-            backdrop-filter: blur(14px);
-        }
-
-        .login-kicker {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 18px;
-            padding: 8px 12px;
-            border-radius: 999px;
-            background: rgba(192, 57, 43, 0.08);
-            color: var(--primary);
-            font-size: 0.78rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-
-        .login-card h2 {
-            margin: 0 0 10px;
-            font-family: 'Fraunces', serif;
-            font-size: 2.25rem;
-            letter-spacing: -0.03em;
-        }
-
-        .login-card > p {
-            margin: 0 0 26px;
-            color: var(--auth-muted);
-            line-height: 1.7;
-        }
-
-        .login-form {
-            display: grid;
-            gap: 18px;
-        }
-
-        .field label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: var(--auth-ink);
-        }
-
-        .field input {
-            width: 100%;
-            border: 1px solid var(--auth-line);
-            border-radius: 16px;
+        .front-login-showcase,
+        .front-login-card {
+            padding: 2rem;
+            border: 1px solid rgba(17, 17, 17, 0.08);
+            border-radius: 32px;
             background: rgba(255, 255, 255, 0.92);
-            padding: 15px 16px;
-            font: inherit;
-            color: var(--auth-ink);
-            transition: 0.2s ease;
+            box-shadow: 0 24px 70px rgba(17, 17, 17, 0.08);
         }
 
-        .field input:focus {
-            outline: none;
-            border-color: rgba(192, 57, 43, 0.38);
-            box-shadow: 0 0 0 4px rgba(192, 57, 43, 0.10);
+        .front-login-showcase {
+            background: linear-gradient(145deg, #fff7ea, #ffffff 55%, #fff0e4);
         }
 
-        .login-row {
+        .front-login-showcase h1,
+        .front-login-card h2 {
+            margin: 0;
+            font-family: "Bricolage Grotesque", sans-serif;
+            line-height: 0.98;
+        }
+
+        .front-login-showcase h1 {
+            font-size: clamp(2.8rem, 5vw, 4.6rem);
+            max-width: 10ch;
+        }
+
+        .front-login-showcase p,
+        .front-login-card p,
+        .front-login-note {
+            color: var(--front-muted);
+            line-height: 1.75;
+        }
+
+        .front-login-points {
+            display: grid;
+            gap: 0.9rem;
+            margin-top: 1.6rem;
+        }
+
+        .front-login-points article {
+            padding: 1rem 1.1rem;
+            border-radius: 20px;
+            background: #fff;
+            border: 1px solid rgba(17, 17, 17, 0.06);
+        }
+
+        .front-login-points strong {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-family: "Bricolage Grotesque", sans-serif;
+        }
+
+        .front-login-form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .front-login-field {
+            display: grid;
+            gap: 0.4rem;
+        }
+
+        .front-login-field span {
+            font-size: 0.82rem;
+            font-weight: 800;
+        }
+
+        .front-login-field input {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 1px solid rgba(17, 17, 17, 0.12);
+            border-radius: 16px;
+        }
+
+        .front-login-row {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            gap: 12px;
+            align-items: center;
+            gap: 1rem;
             flex-wrap: wrap;
         }
 
-        .remember {
+        .front-login-remember {
             display: inline-flex;
+            gap: 0.55rem;
             align-items: center;
-            gap: 10px;
-            color: var(--auth-muted);
-            font-size: 0.9rem;
+            color: var(--front-muted);
         }
 
-        .remember input {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--primary);
-        }
-
-        .login-link {
-            color: var(--primary);
-            font-size: 0.9rem;
-            font-weight: 700;
-            text-decoration: none;
-        }
-
-        .login-link:hover {
-            color: var(--primary-dark);
-        }
-
-        .login-submit {
-            width: 100%;
-            border: none;
-            border-radius: 18px;
-            padding: 15px 18px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            color: white;
-            font-size: 0.96rem;
+        .front-login-link {
+            color: var(--front-accent-dark);
             font-weight: 800;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            cursor: pointer;
-            box-shadow: 0 18px 36px rgba(192, 57, 43, 0.22);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .login-submit:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 22px 42px rgba(192, 57, 43, 0.26);
-        }
-
-        .login-note {
-            margin-top: 18px;
-            padding-top: 18px;
-            border-top: 1px solid var(--auth-line);
-            font-size: 0.86rem;
-            color: var(--auth-muted);
-        }
-
-        .login-alert,
-        .login-errors {
-            margin-bottom: 18px;
-            padding: 14px 16px;
+        .front-login-alert,
+        .front-login-errors {
+            margin-bottom: 1rem;
+            padding: 0.9rem 1rem;
             border-radius: 16px;
-            font-size: 0.9rem;
         }
 
-        .login-alert {
-            background: rgba(39, 174, 96, 0.10);
-            color: #1f7a46;
-            border: 1px solid rgba(39, 174, 96, 0.14);
+        .front-login-alert {
+            background: rgba(33, 83, 67, 0.12);
+            color: var(--front-forest);
         }
 
-        .login-errors {
-            background: rgba(192, 57, 43, 0.08);
-            color: #a12c21;
-            border: 1px solid rgba(192, 57, 43, 0.12);
+        .front-login-errors {
+            background: rgba(217, 74, 39, 0.10);
+            color: #a03018;
         }
 
-        .login-errors ul {
+        .front-login-errors ul {
             margin: 0;
-            padding-left: 18px;
+            padding-left: 1rem;
         }
 
-        @media (max-width: 1080px) {
-            .login-stage {
-                grid-template-columns: 1fr;
-            }
-
-            .login-showcase {
-                min-height: auto;
-                padding-bottom: 34px;
-            }
-
-            .login-panel {
-                padding-top: 0;
-            }
+        .front-login-actions {
+            display: grid;
+            gap: 0.8rem;
+            margin-top: 0.3rem;
         }
 
-        @media (max-width: 640px) {
-            .login-showcase {
-                padding: 30px 20px 26px;
-            }
+        .front-login-note {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(17, 17, 17, 0.08);
+        }
 
-            .login-panel {
-                padding: 18px;
-            }
-
-            .login-card {
-                padding: 24px 20px;
-                border-radius: 24px;
-            }
-
-            .showcase-grid {
+        @media (max-width: 900px) {
+            .front-login-shell {
                 grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
-<body class="auth-login-page">
-    <div class="login-stage">
-        <section class="login-showcase">
-            <div class="brand-chip">
-                @if(\App\Models\WebsiteSetting::get('logo'))
-                    <img src="{{ asset('storage/'.\App\Models\WebsiteSetting::get('logo')) }}" alt="Logo">
-                @else
-                    <div class="brand-badge"><i class="bi bi-shop"></i></div>
-                @endif
-                <div>
-                    <small>Restaurant Booking System</small>
-                    <strong>{{ \App\Models\WebsiteSetting::get('restaurant_name', config('app.name')) }}</strong>
-                </div>
-            </div>
-
-            <div class="showcase-copy">
-                <h1>Table operations, guest flow, and promotions in one place.</h1>
-                <p>Use the control center built for your restaurant team to manage bookings, menu offers, customer communication, and day-to-day service decisions with less friction.</p>
-            </div>
-
-            <div class="showcase-grid">
-                <div class="showcase-card">
-                    <span>Bookings</span>
-                    <strong>Daily</strong>
-                    <p>Track reservations, guest mix, slot usage, and table readiness.</p>
-                </div>
-                <div class="showcase-card">
-                    <span>Engagement</span>
-                    <strong>Direct</strong>
-                    <p>Handle enquiries, vouchers, offers, and campaign messages from one backend.</p>
-                </div>
-                <div class="showcase-card">
-                    <span>Control</span>
-                    <strong>Admin</strong>
-                    <p>Access settings, activity logs, system logs, and business content securely.</p>
-                </div>
+<body class="front-login-page">
+    <div class="front-login-shell">
+        <section class="front-login-showcase">
+            <p class="section-kicker">Front User Access</p>
+            <h1>Login to your dining dashboard.</h1>
+            <p>Use your customer account to review bookings, confirm OTP, and manage your front-user experience. Admin access is separate.</p>
+            <div class="front-login-points">
+                <article>
+                    <strong>User dashboard only</strong>
+                    <p>This login is for guests and registered front users.</p>
+                </article>
+                <article>
+                    <strong>OTP on login</strong>
+                    <p>Every fresh user login asks for OTP before dashboard access is unlocked.</p>
+                </article>
+                <article>
+                    <strong>Need admin access?</strong>
+                    <p><a class="front-login-link" href="{{ route('admin.login') }}">Go to admin login</a></p>
+                </article>
             </div>
         </section>
 
-        <section class="login-panel">
-            <div class="login-card">
-                <div class="login-kicker">Admin Access</div>
-                <h2>Sign in</h2>
-                <p>Continue to the restaurant management dashboard.</p>
+        <section class="front-login-card">
+            <p class="section-kicker">User Login</p>
+            <h2>Sign in</h2>
+            <p>Continue to your front user dashboard.</p>
 
-                @if (session('status'))
-                    <div class="login-alert">{{ session('status') }}</div>
-                @endif
+            @if (session('status'))
+                <div class="front-login-alert">{{ session('status') }}</div>
+            @endif
 
-                @if ($errors->any())
-                    <div class="login-errors">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                <form method="POST" action="{{ route('login') }}" class="login-form">
-                    @csrf
-
-                    <div class="field">
-                        <label for="email">Email Address</label>
-                        <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="admin@restaurant.com">
-                    </div>
-
-                    <div class="field">
-                        <label for="password">Password</label>
-                        <input id="password" type="password" name="password" required autocomplete="current-password" placeholder="Enter your password">
-                    </div>
-
-                    <div class="login-row">
-                        <label for="remember_me" class="remember">
-                            <input id="remember_me" type="checkbox" name="remember">
-                            <span>Keep me signed in</span>
-                        </label>
-
-                        @if (Route::has('password.request'))
-                            <a class="login-link" href="{{ route('password.request') }}">Forgot password?</a>
-                        @endif
-                    </div>
-
-                    <button type="submit" class="login-submit">Log In</button>
-                </form>
-
-                <div class="login-note">
-                    Authorized restaurant staff only. Your activity can be monitored through admin audit and system logs.
+            @if ($errors->any())
+                <div class="front-login-errors">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
+            @endif
+
+            <form method="POST" action="{{ route('login') }}" class="front-login-form">
+                @csrf
+
+                <label class="front-login-field">
+                    <span>Email Address</span>
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="you@example.com">
+                </label>
+
+                <label class="front-login-field">
+                    <span>Password</span>
+                    <input id="password" type="password" name="password" required autocomplete="current-password" placeholder="Enter your password">
+                </label>
+
+                <div class="front-login-row">
+                    <label class="front-login-remember" for="remember_me">
+                        <input id="remember_me" type="checkbox" name="remember">
+                        <span>Keep me signed in</span>
+                    </label>
+
+                    @if (Route::has('password.request'))
+                        <a class="front-login-link" href="{{ route('password.request') }}">Forgot password?</a>
+                    @endif
+                </div>
+
+                <div class="front-login-actions">
+                    <button type="submit" class="button button--solid">Login to Dashboard</button>
+                    <a class="button button--ghost-dark" href="{{ route('register') }}">Create Account</a>
+                </div>
+            </form>
+
+            <div class="front-login-note">
+                Admin users should use <a class="front-login-link" href="{{ route('admin.login') }}">/admin-login</a>.
             </div>
         </section>
     </div>

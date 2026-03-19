@@ -8,6 +8,7 @@ use App\Models\Booking;
 use App\Models\User;
 use App\Services\ReservationService;
 use App\Services\SmsService;
+use App\Services\UserOtpService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,7 +24,8 @@ class ReservationController extends Controller
 {
     public function __construct(
         protected ReservationService $reservationService,
-        protected SmsService $smsService
+        protected SmsService $smsService,
+        protected UserOtpService $userOtpService
     ) {
     }
 
@@ -78,6 +80,7 @@ class ReservationController extends Controller
         });
 
         $this->dispatchNotifications($booking, $validated['email'], $validated['mobile']);
+        $this->issueDashboardOtp($booking);
 
         return redirect()
             ->route('reservations.show', $booking->confirmation_code)
@@ -147,6 +150,40 @@ class ReservationController extends Controller
             ->with('success', 'The reservation has been rescheduled.');
     }
 
+    public function verifyDashboardOtp(Request $request, string $confirmationCode): RedirectResponse
+    {
+        $validated = $request->validate([
+            'otp' => ['required', 'digits:6'],
+        ]);
+
+        $booking = $this->findBooking($confirmationCode)->load('user');
+        $user = $booking->user;
+
+        if (! $user || ! $this->userOtpService->verify($user, $validated['otp'])) {
+            return back()->withErrors([
+                'reservation_otp' => 'The OTP is invalid or has expired. Please try again.',
+            ]);
+        }
+
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return redirect()
+            ->route('dashboard')
+            ->with('status', 'Your dashboard is now unlocked.');
+    }
+
+    public function resendDashboardOtp(string $confirmationCode): RedirectResponse
+    {
+        $booking = $this->findBooking($confirmationCode)->load('user');
+
+        if ($booking->user) {
+            $this->userOtpService->resend($booking->user);
+        }
+
+        return back()->with('success', 'A fresh OTP has been sent to your email and mobile.');
+    }
+
     protected function resolveUser(array $validated): User
     {
         if (Auth::check()) {
@@ -179,7 +216,6 @@ class ReservationController extends Controller
             'email' => $email,
             'mobile' => $validated['mobile'],
             'password' => Hash::make(Str::random(32)),
-            'email_verified_at' => now(),
         ]);
     }
 
@@ -215,6 +251,19 @@ class ReservationController extends Controller
                 $booking->update(['sms_sent' => true]);
             }
         }
+    }
+
+    protected function issueDashboardOtp(Booking $booking): void
+    {
+        if (! $booking->user) {
+            return;
+        }
+
+        if (Auth::check() && Auth::id() === $booking->user_id && $booking->user->hasVerifiedContact()) {
+            return;
+        }
+
+        $this->userOtpService->issue($booking->user);
     }
 
     protected function findBooking(string $confirmationCode): Booking
@@ -262,3 +311,5 @@ class ReservationController extends Controller
         ];
     }
 }
+
+
