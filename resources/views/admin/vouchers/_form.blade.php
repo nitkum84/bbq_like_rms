@@ -29,7 +29,7 @@
 
     <div class="col-md-4">
         <label class="form-label">Assign To User</label>
-        <select name="assigned_to_user_id" class="form-select @error('assigned_to_user_id') is-invalid @enderror">
+        <select name="assigned_to_user_id" class="form-select searchable-select @error('assigned_to_user_id') is-invalid @enderror" data-searchable-select data-placeholder="Search user">
             <option value="">Unassigned</option>
             @foreach($users as $user)
                 <option value="{{ $user->id }}" @selected((string) old('assigned_to_user_id', $voucher?->assigned_to_user_id) === (string) $user->id)>{{ $user->name }}{{ $user->email ? ' - '.$user->email : '' }}</option>

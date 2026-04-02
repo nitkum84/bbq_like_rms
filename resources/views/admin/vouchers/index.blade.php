@@ -166,7 +166,7 @@
                         <td style="min-width: 220px;">
                             <form action="{{ route('admin.vouchers.assign', $voucher->id) }}" method="POST" class="d-flex gap-2">
                                 @csrf
-                                <select name="user_id" class="form-select form-select-sm">
+                                <select name="user_id" class="form-select form-select-sm searchable-select" data-searchable-select data-placeholder="Search user">
                                     <option value="">Assign user</option>
                                     @foreach($users as $user)
                                         <option value="{{ $user->id }}" @selected($voucher->assigned_to_user_id === $user->id)>{{ $user->name }}</option>

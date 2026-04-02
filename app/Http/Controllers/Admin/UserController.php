@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Voucher;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -52,6 +53,28 @@ class UserController extends Controller {
         $user = User::create($validated);
 
         return redirect()->route('admin.users.show', $user)->with('success', 'User created.');
+    }
+
+    public function quickCreate(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|max:255|unique:users,email',
+            'mobile' => 'nullable|string|max:15',
+        ]);
+
+        $user = User::create([
+            ...$validated,
+            'password' => Hash::make(str()->random(16)),
+            'status' => 1,
+        ]);
+
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'mobile' => $user->mobile,
+        ]);
     }
 
     public function show(User $user): View {

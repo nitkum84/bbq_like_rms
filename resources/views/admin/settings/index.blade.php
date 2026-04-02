@@ -33,6 +33,10 @@
                         <label class="form-label">Booking Confirmation Note</label>
                         <textarea name="booking_note" class="form-control" rows="2" placeholder="Displayed on booking confirmation page">{{ $settings['booking_note'] ?? '' }}</textarea>
                     </div>
+                    <div class="col-md-4">
+                        <label class="form-label">GST Rate (%)</label>
+                        <input type="number" step="0.01" min="0" max="100" name="gst_rate" class="form-control" value="{{ $settings['gst_rate'] ?? '5' }}">
+                    </div>
                 </div>
             </div></div>
 

@@ -83,7 +83,7 @@
                     @csrf
                     <div class="mb-3">
                         <label class="form-label">Select User</label>
-                        <select name="user_id" class="form-select" required>
+                        <select name="user_id" class="form-select searchable-select" data-searchable-select data-placeholder="Search user" required>
                             <option value="">Choose user</option>
                             @foreach($users as $user)
                                 <option value="{{ $user->id }}" @selected($voucher->assigned_to_user_id === $user->id)>{{ $user->name }}</option>

@@ -66,6 +66,7 @@ class BookingController extends Controller {
         $validated['confirmation_code'] = $validated['confirmation_code'] ?: Booking::generateConfirmationCode();
         $validated['guest_type'] = $this->normalizeGuestTypes($request);
         $validated['offer_applied'] = $request->boolean('offer_applied');
+        $validated['booking_meta'] = $this->buildBookingMeta($request, $validated);
 
         $booking = Booking::create($validated);
 
@@ -86,6 +87,7 @@ class BookingController extends Controller {
         $validated = $this->validateBooking($request, $booking);
         $validated['guest_type'] = $this->normalizeGuestTypes($request);
         $validated['offer_applied'] = $request->boolean('offer_applied');
+        $validated['booking_meta'] = array_merge($booking->booking_meta ?? [], $this->buildBookingMeta($request, $validated));
 
         $booking->update($validated);
 
@@ -128,6 +130,8 @@ class BookingController extends Controller {
             'veg_count' => 'required|integer|min:0',
             'nonveg_count' => 'required|integer|min:0',
             'total_amount' => 'required|numeric|min:0',
+            'coupon_code' => 'nullable|string|max:50',
+            'gst_rate' => 'nullable|numeric|min:0|max:100',
             'status' => 'required|in:pending,confirmed,cancelled,completed',
             'admin_notes' => 'nullable|string',
             'confirmation_code' => 'nullable|string|max:20|unique:bookings,confirmation_code'.($booking ? ','.$booking->id : ''),
@@ -194,5 +198,31 @@ class BookingController extends Controller {
             ->take(3)
             ->values()
             ->all();
+    }
+
+    protected function buildBookingMeta(Request $request, array $validated): array
+    {
+        $user = User::find($validated['user_id']);
+        $subtotal = (float) $request->input('subtotal', $validated['total_amount']);
+        $discountTotal = (float) $request->input('discount_total', 0);
+        $gstRate = (float) $request->input('gst_rate', 0);
+        $preTaxTotal = max($subtotal - $discountTotal, 0);
+        $gstAmount = round($preTaxTotal * ($gstRate / 100), 2);
+
+        return [
+            'guests' => (int) $validated['veg_count'] + (int) $validated['nonveg_count'],
+            'food_preference' => $validated['nonveg_count'] > 0 ? 'nonveg' : 'veg',
+            'contact' => [
+                'name' => $user?->name,
+                'email' => $user?->email,
+                'mobile' => $user?->mobile,
+            ],
+            'coupon_code' => $request->input('coupon_code'),
+            'subtotal' => round($subtotal, 2),
+            'discount_total' => round($discountTotal, 2),
+            'pre_tax_total' => round($preTaxTotal, 2),
+            'gst_rate' => $gstRate,
+            'gst_amount' => $gstAmount,
+        ];
     }
 }

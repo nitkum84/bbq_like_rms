@@ -21,6 +21,8 @@
         </div>
     </div>
 </div>
+
+@include('admin.bookings._quick_user_modal')
 @endsection
 
 @push('scripts')

@@ -75,6 +75,13 @@
                     <div class="small text-muted">Offer Applied</div>
                     <div class="fw-semibold">{{ $booking->offer_applied ? 'Yes' : 'No' }}</div>
                 </div>
+                <div class="mb-3">
+                    <div class="small text-muted">Coupon / GST</div>
+                    <div class="fw-semibold">
+                        {{ $booking->booking_meta['coupon_code'] ?? 'No coupon' }}
+                        | GST {{ number_format((float) ($booking->booking_meta['gst_rate'] ?? 0), 2) }}%
+                    </div>
+                </div>
                 <div>
                     <div class="small text-muted">Admin Notes</div>
                     <div class="fw-semibold">{{ $booking->admin_notes ?: 'No notes added.' }}</div>

@@ -26,6 +26,9 @@ class SettingController extends Controller {
             'restaurant_name' => 'required|string|max:100',
             'contact_email'   => 'required|email',
             'contact_mobile'  => 'required|string|max:15',
+            'address'         => 'nullable|string|max:1000',
+            'booking_note'    => 'nullable|string|max:255',
+            'gst_rate'        => 'nullable|numeric|min:0|max:100',
             'logo'            => 'nullable|image|mimes:jpg,jpeg,png,svg,webp|max:2048',
             'facebook_url'    => 'nullable|url',
             'instagram_url'   => 'nullable|url',
@@ -48,7 +51,7 @@ class SettingController extends Controller {
         ]);
 
         $fields = [
-            'restaurant_name','contact_email','contact_mobile','address','booking_note',
+            'restaurant_name','contact_email','contact_mobile','address','booking_note','gst_rate',
             'facebook_url','instagram_url','google_maps_url','maintenance_mode',
             'email_enabled','mail_mailer','mail_host','mail_port','mail_username','mail_password',
             'mail_encryption','mail_from_address','mail_from_name',

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
+use App\Models\DealsBundle;
+use App\Models\EventsHighlight;
 use App\Models\WebsiteSetting;
 use App\Services\ReservationService;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +23,8 @@ class HomeController extends Controller
     {
         $restaurantName = WebsiteSetting::get('restaurant_name', config('app.name', 'Restaurant Booking'));
         $homeUrl = route('home');
-        $profileUrl = Route::has('login') ? route('login') : '#';
+        $guestAccountUrl = Route::has('login') ? route('login') : '#';
+        $profileUrl = $guestAccountUrl;
         $frontDashboardUrl = null;
 
         if (Auth::check()) {
@@ -34,10 +37,12 @@ class HomeController extends Controller
             }
         }
 
+        $accountUrl = $frontDashboardUrl ?: $guestAccountUrl;
+
         $primaryNavigation = [
             ['label' => 'Happiness Cards', 'url' => $homeUrl.'#happiness-cards'],
-            ['label' => "What's On {$restaurantName}", 'url' => $homeUrl.'#offerings'],
-            ['label' => 'Deals', 'url' => $homeUrl.'#deals'],
+            ['label' => "What's On {$restaurantName}", 'url' => route('blogs.index')],
+            ['label' => 'Deals', 'url' => route('deals.index')],
             ['label' => 'Restaurants', 'url' => $homeUrl.'#booking-cta'],
         ];
 
@@ -47,33 +52,31 @@ class HomeController extends Controller
                 'items' => [
                     ['label' => $restaurantName, 'url' => $homeUrl],
                     ['label' => 'Home', 'url' => $homeUrl],
-                    ['label' => "What's On {$restaurantName}", 'url' => $homeUrl.'#offerings'],
-                    ['label' => 'Deals', 'url' => $homeUrl.'#deals'],
+                    ['label' => "What's On {$restaurantName}", 'url' => route('blogs.index')],
+                    ['label' => 'Deals', 'url' => route('deals.index')],
                     ['label' => 'Delivery / Takeaway', 'url' => $homeUrl.'#services'],
                     ['label' => 'Restaurants', 'url' => $homeUrl.'#booking-cta'],
-                    ['label' => 'Happiness Cards', 'url' => $homeUrl.'#happiness-cards'],
-                    ['label' => 'Catering', 'url' => $homeUrl.'#services'],
+                    ['label' => 'Happiness Cards', 'url' => route('happiness-cards.index')],
+                    ['label' => 'Catering', 'url' => route('enquiries.create')],
                 ],
             ],
             [
                 'title' => 'Profile',
                 'items' => [
-                    ['label' => 'Profile', 'url' => $profileUrl],
-                    ['label' => 'My Reservations', 'url' => $frontDashboardUrl ? $frontDashboardUrl.'#reservations' : $homeUrl.'#booking-cta'],
-                    ['label' => 'My Profile', 'url' => $frontDashboardUrl ? $frontDashboardUrl.'#profile' : $profileUrl],
-                    ['label' => 'My Smiles', 'url' => $homeUrl.'#happiness-cards'],
-                    ['label' => 'My Happiness Card', 'url' => $homeUrl.'#happiness-cards'],
-                    ['label' => 'Delivery History', 'url' => $homeUrl.'#services'],
+                    ['label' => 'Profile', 'url' => $accountUrl],
+                    ['label' => 'My Reservations', 'url' => $frontDashboardUrl ? $frontDashboardUrl.'#bookings' : $accountUrl],
+                    ['label' => 'My Profile', 'url' => $frontDashboardUrl ? $frontDashboardUrl.'#profile' : $accountUrl],
+                    ['label' => 'My Smiles', 'url' => $frontDashboardUrl ? $frontDashboardUrl.'#rewards' : $accountUrl],
+                    ['label' => 'My Happiness Card', 'url' => $frontDashboardUrl ? $frontDashboardUrl.'#rewards' : $accountUrl],
+                    ['label' => 'Delivery History', 'url' => $frontDashboardUrl ? $frontDashboardUrl.'#rewards' : $accountUrl],
                 ],
             ],
             [
                 'title' => 'About',
                 'items' => [
                     ['label' => 'About Us', 'url' => $homeUrl.'#footer'],
-                    ['label' => 'Blogs', 'url' => $homeUrl.'#updates'],
-                    ['label' => 'Smiles', 'url' => $homeUrl.'#happiness-cards'],
-                    ['label' => 'News', 'url' => $homeUrl.'#updates'],
-                    ['label' => 'Nutrition Information', 'url' => $homeUrl.'#offerings'],
+                    ['label' => 'Blogs', 'url' => route('blogs.index')],
+                    ['label' => 'Smiles', 'url' => route('happiness-cards.index')],
                 ],
             ],
             [
@@ -81,9 +84,8 @@ class HomeController extends Controller
                 'items' => [
                     ['label' => 'Contact Us', 'url' => $homeUrl.'#footer'],
                     ['label' => 'FAQ', 'url' => $homeUrl.'#footer'],
-                    ['label' => 'Corporate Enquiry', 'url' => $homeUrl.'#services'],
+                    ['label' => 'Corporate Enquiry', 'url' => route('enquiries.create')],
                     ['label' => 'Investor Relations', 'url' => $homeUrl.'#footer'],
-                    ['label' => 'Barbeque Nation Partnership', 'url' => $homeUrl.'#services'],
                 ],
             ],
         ];
@@ -162,27 +164,50 @@ class HomeController extends Controller
         ];
 
         $deals = [
-            [
-                'title' => 'Weekday Lunch Rush',
-                'description' => 'Value buffet pricing for fast lunch plans without cutting the spread short.',
-                'badge' => 'Mon to Thu',
-            ],
-            [
-                'title' => 'Family Celebration Pack',
-                'description' => 'Dessert add-ons, decorated table styling, and photo-friendly birthday moments.',
-                'badge' => 'Best Seller',
-            ],
-            [
-                'title' => 'Member-Only Card Benefit',
-                'description' => 'Extra value redemptions and priority access reserved for Happiness Card holders.',
-                'badge' => 'Exclusive',
-            ],
+            ...DealsBundle::active()
+                ->orderBy('valid_to')
+                ->take(3)
+                ->get()
+                ->map(fn (DealsBundle $deal) => [
+                    'id' => $deal->id,
+                    'title' => $deal->name,
+                    'description' => $deal->description,
+                    'badge' => strtoupper($deal->discount_percent.'% OFF'),
+                ])
+                ->all(),
         ];
+
+        if (empty($deals)) {
+            $deals = [
+                [
+                    'title' => 'Weekday Lunch Rush',
+                    'description' => 'Value buffet pricing for fast lunch plans without cutting the spread short.',
+                    'badge' => 'Mon to Thu',
+                ],
+                [
+                    'title' => 'Family Celebration Pack',
+                    'description' => 'Dessert add-ons, decorated table styling, and photo-friendly birthday moments.',
+                    'badge' => 'Best Seller',
+                ],
+                [
+                    'title' => 'Member-Only Card Benefit',
+                    'description' => 'Extra value redemptions and priority access reserved for Happiness Card holders.',
+                    'badge' => 'Exclusive',
+                ],
+            ];
+        }
+
+        $happinessCards = EventsHighlight::active()
+            ->orderBy('display_order')
+            ->take(3)
+            ->get();
 
         $blogs = collect();
 
         if (Schema::hasTable('blogs')) {
             $blogs = Blog::query()
+                ->where('status', 'published')
+                ->latest('published_at')
                 ->latest()
                 ->take(3)
                 ->get(['title', 'slug', 'image', 'created_at']);
@@ -213,6 +238,8 @@ class HomeController extends Controller
             'defaultMealType' => 'lunch',
             'defaultGuests' => 2,
             'defaultFoodPreference' => 'veg',
+            'defaultDealId' => request('deal'),
+            'defaultVoucherCode' => '',
         ];
 
         return view('front.pages.home', [
@@ -223,6 +250,7 @@ class HomeController extends Controller
             'services' => $services,
             'offerings' => $offerings,
             'deals' => $deals,
+            'happinessCards' => $happinessCards,
             'blogs' => $blogs,
             'stats' => $stats,
             'profileUrl' => $profileUrl,

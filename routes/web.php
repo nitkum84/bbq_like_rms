@@ -19,12 +19,22 @@ use App\Http\Controllers\Admin\{
     UserController,
     VoucherController
 };
+use App\Http\Controllers\Front\ContentController;
+use App\Http\Controllers\Front\EnquiryController as FrontEnquiryController;
 use App\Http\Controllers\Front\HomeController;
 use App\Http\Controllers\Front\ReservationController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
+Route::get('/blogs', [ContentController::class, 'blogs'])->name('blogs.index');
+Route::get('/blogs/{blog:slug}', [ContentController::class, 'blogShow'])->name('blogs.show');
+Route::get('/happiness-cards', [ContentController::class, 'happinessCards'])->name('happiness-cards.index');
+Route::get('/happiness-cards/{eventsHighlight}', [ContentController::class, 'happinessCardShow'])->name('happiness-cards.show');
+Route::get('/deals', [ContentController::class, 'deals'])->name('deals.index');
+Route::get('/deals/{dealsBundle}', [ContentController::class, 'dealShow'])->name('deals.show');
+Route::get('/catering', [FrontEnquiryController::class, 'create'])->name('enquiries.create');
+Route::post('/catering', [FrontEnquiryController::class, 'store'])->name('enquiries.store');
 Route::get('/reservations/quote', [ReservationController::class, 'quote'])->name('reservations.quote');
 Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
 Route::get('/reservations/{confirmationCode}', [ReservationController::class, 'show'])->name('reservations.show');
@@ -70,6 +80,7 @@ Route::prefix('admin-panel')->name('admin.')->middleware(['auth', 'admin'])->gro
 
     Route::resource('users', UserController::class);
     Route::post('users/{id}/toggle', [UserController::class, 'toggle'])->name('users.toggle');
+    Route::post('users/quick-create', [UserController::class, 'quickCreate'])->name('users.quick-create');
 
     Route::resource('enquiries', EnquiryController::class);
     Route::post('enquiries/{id}/reply', [EnquiryController::class, 'reply'])->name('enquiries.reply');

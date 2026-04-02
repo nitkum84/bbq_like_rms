@@ -138,7 +138,7 @@ class ProfileController extends Controller
             'profileUrl' => route('dashboard'),
             'primaryNavigation' => [
                 ['label' => 'Dashboard', 'url' => route('dashboard')],
-                ['label' => 'Reservations', 'url' => route('dashboard').'#reservations'],
+                ['label' => 'Bookings', 'url' => route('dashboard').'#bookings'],
                 ['label' => 'Rewards', 'url' => route('dashboard').'#rewards'],
                 ['label' => 'Book Table', 'url' => route('home').'#booking-cta'],
             ],
@@ -147,7 +147,7 @@ class ProfileController extends Controller
                     'title' => 'Account',
                     'items' => [
                         ['label' => 'My Profile', 'url' => route('dashboard').'#profile'],
-                        ['label' => 'Reservations', 'url' => route('dashboard').'#reservations'],
+                        ['label' => 'Bookings', 'url' => route('dashboard').'#bookings'],
                         ['label' => 'Rewards', 'url' => route('dashboard').'#rewards'],
                         ['label' => 'Book A Table', 'url' => route('home').'#booking-cta'],
                     ],

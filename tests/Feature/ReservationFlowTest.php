@@ -28,7 +28,9 @@ class ReservationFlowTest extends TestCase
         ]));
 
         $response->assertOk()
-            ->assertJsonPath('pricing.total', 1000)
+            ->assertJsonPath('pricing.pre_tax_total', 1000)
+            ->assertJsonPath('pricing.gst_amount', 50)
+            ->assertJsonPath('pricing.total', 1050)
             ->assertJsonPath('slots.0.available', true);
     }
 

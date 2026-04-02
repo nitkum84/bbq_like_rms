@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-7MibPN9a.css",
+    "file": "assets/app-BIJcDEsS.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -9,7 +9,7 @@
     ]
   },
   "resources/css/front.css": {
-    "file": "assets/front-Dzuw0NBx.css",
+    "file": "assets/front-By1OifjE.css",
     "src": "resources/css/front.css",
     "isEntry": true,
     "name": "front",
@@ -24,7 +24,7 @@
     "isEntry": true
   },
   "resources/js/front.js": {
-    "file": "assets/front-DwrEgsW8.js",
+    "file": "assets/front-CRpzXz0J.js",
     "name": "front",
     "src": "resources/js/front.js",
     "isEntry": true

@@ -8,6 +8,7 @@ class Blog extends Model {
     protected $fillable = ['title','slug','content','image','meta_title','meta_description','author_id','status','published_at'];
     protected $casts = ['published_at'=>'datetime'];
     public function author() { return $this->belongsTo(User::class, 'author_id'); }
+    public function getRouteKeyName(): string { return 'slug'; }
     public function getImageUrlAttribute() {
         return $this->image ? asset('storage/'.$this->image) : asset('admin/images/no-image.png');
     }

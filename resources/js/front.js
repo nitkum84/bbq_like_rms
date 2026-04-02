@@ -148,6 +148,8 @@ if (reservationDrawer && reservationForm) {
     const foodOptionsList = reservationForm.querySelector('[data-food-options]');
     const packageField = reservationForm.querySelector('[data-package-field]');
     const packageSelect = reservationForm.querySelector('[data-package-select]');
+    const couponHiddenInput = reservationForm.querySelector('input[name="voucher_code"]');
+    const couponDisplayInput = reservationForm.querySelector('[data-coupon-input]');
     const mealInput = reservationForm.querySelector('input[name="meal_type"]');
     const slotInput = reservationForm.querySelector('input[name="slot_id"]');
     const dateInput = reservationForm.querySelector('input[name="date"]');
@@ -155,10 +157,13 @@ if (reservationDrawer && reservationForm) {
     const foodInput = reservationForm.querySelector('input[name="food_preference"]');
     const pricePerGuest = reservationForm.querySelector('[data-price-per-guest]');
     const totalPrice = reservationForm.querySelector('[data-total-price]');
+    const discountTotal = reservationForm.querySelector('[data-discount-total]');
+    const gstTotal = reservationForm.querySelector('[data-gst-total]');
     const priceLabel = reservationForm.querySelector('[data-price-label]');
     const summaryDatetime = reservationForm.querySelector('[data-summary-datetime]');
     const summaryGuests = reservationForm.querySelector('[data-summary-guests]');
     const summaryFood = reservationForm.querySelector('[data-summary-food]');
+    const summaryCoupon = reservationForm.querySelector('[data-summary-coupon]');
     const summaryTotal = reservationForm.querySelector('[data-summary-total]');
     const summaryRestaurant = reservationForm.querySelector('[data-summary-restaurant]');
     const mealButtons = Array.from(reservationForm.querySelectorAll('[data-meal-option]'));
@@ -167,6 +172,7 @@ if (reservationDrawer && reservationForm) {
         mealType: bootstrap.defaultMealType || 'lunch',
         foodPreference: bootstrap.defaultFoodPreference || 'veg',
         selectedSlotId: null,
+        selectedDealId: bootstrap.defaultDealId || null,
         quote: null,
     };
 
@@ -304,6 +310,9 @@ if (reservationDrawer && reservationForm) {
             : 'Choose a date and slot';
         summaryGuests.textContent = `${guestsInput.value || 0} guest${Number(guestsInput.value || 0) === 1 ? '' : 's'}`;
         summaryFood.textContent = `${readableFood}${packageText}`;
+        if (summaryCoupon) {
+            summaryCoupon.textContent = couponHiddenInput?.value ? couponHiddenInput.value.toUpperCase() : 'Not applied';
+        }
         summaryTotal.textContent = formatCurrency(state.quote?.pricing?.total || 0);
     };
 
@@ -311,6 +320,12 @@ if (reservationDrawer && reservationForm) {
         state.quote = quote;
         renderSlots(quote.slots || []);
         pricePerGuest.textContent = formatCurrency(quote.pricing?.price_per_guest || 0);
+        if (discountTotal) {
+            discountTotal.textContent = formatCurrency(quote.pricing?.discount_total || 0);
+        }
+        if (gstTotal) {
+            gstTotal.textContent = `${formatCurrency(quote.pricing?.gst_amount || 0)} (${Number(quote.pricing?.gst_rate || 0).toFixed(2)}%)`;
+        }
         totalPrice.textContent = formatCurrency(quote.pricing?.total || 0);
         priceLabel.textContent = quote.pricing?.pricing_label || 'Pricing unavailable';
         updateSummary();
@@ -334,6 +349,10 @@ if (reservationDrawer && reservationForm) {
             params.set('deals_bundle_id', packageSelect.value);
         }
 
+        if (couponHiddenInput?.value) {
+            params.set('voucher_code', couponHiddenInput.value);
+        }
+
         try {
             setFeedback('Checking live availability...', false);
             const response = await fetch(`${bootstrap.quoteUrl}?${params.toString()}`, {
@@ -353,6 +372,14 @@ if (reservationDrawer && reservationForm) {
 
     reservationOpenButtons.forEach((button) => {
         button.addEventListener('click', async () => {
+            const requestedDealId = button.dataset.dealId || null;
+            if (requestedDealId) {
+                state.foodPreference = 'packages';
+                foodInput.value = 'packages';
+                renderFoodOptions(bootstrap.foodOptions?.options || []);
+                renderPackages(bootstrap.foodOptions?.packages || []);
+                packageSelect.value = String(requestedDealId);
+            }
             toggleDrawer(true);
             await refreshQuote();
         });
@@ -379,6 +406,13 @@ if (reservationDrawer && reservationForm) {
 
     guestsInput.addEventListener('change', refreshQuote);
     packageSelect.addEventListener('change', refreshQuote);
+    if (couponDisplayInput && couponHiddenInput?.value) {
+        couponDisplayInput.value = couponHiddenInput.value;
+    }
+    couponDisplayInput?.addEventListener('change', () => {
+        couponHiddenInput.value = couponDisplayInput.value.trim();
+        refreshQuote();
+    });
 
     reservationForm.addEventListener('submit', (event) => {
         if (!slotInput.value) {
@@ -390,7 +424,25 @@ if (reservationDrawer && reservationForm) {
     renderDates();
     renderFoodOptions(bootstrap.foodOptions?.options || []);
     renderPackages(bootstrap.foodOptions?.packages || []);
+    if (bootstrap.defaultDealId) {
+        state.foodPreference = 'packages';
+        foodInput.value = 'packages';
+        renderFoodOptions(bootstrap.foodOptions?.options || []);
+        renderPackages(bootstrap.foodOptions?.packages || []);
+        packageSelect.value = String(bootstrap.defaultDealId);
+    }
     updateSummary();
+
+    const requestedDealFromQuery = new URLSearchParams(window.location.search).get('deal');
+    if (requestedDealFromQuery) {
+        state.foodPreference = 'packages';
+        foodInput.value = 'packages';
+        renderFoodOptions(bootstrap.foodOptions?.options || []);
+        renderPackages(bootstrap.foodOptions?.packages || []);
+        packageSelect.value = requestedDealFromQuery;
+        toggleDrawer(true);
+        refreshQuote();
+    }
 }
 
 const rescheduleForms = document.querySelectorAll('[data-reschedule-form]');

@@ -7,6 +7,7 @@ use App\Models\DealsBundle;
 use App\Models\PricingRule;
 use App\Models\Table;
 use App\Models\TimeSlot;
+use App\Models\Voucher;
 use App\Models\WebsiteSetting;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -24,6 +25,7 @@ class ReservationService
             'email' => WebsiteSetting::get('contact_email', config('mail.from.address')),
             'mobile' => WebsiteSetting::get('contact_mobile', ''),
             'booking_note' => WebsiteSetting::get('booking_note', 'We look forward to hosting you.'),
+            'gst_rate' => (float) WebsiteSetting::get('gst_rate', 5),
         ];
     }
 
@@ -71,7 +73,7 @@ class ReservationService
         $ignoreBookingId = $data['ignore_booking_id'] ?? null;
 
         $slots = $this->availableSlots($date, $mealType, $guests, $ignoreBookingId);
-        $pricing = $this->pricingBreakdown($date, $guests, $foodPreference, $bundleId);
+        $pricing = $this->pricingBreakdown($date, $guests, $foodPreference, $bundleId, $data['voucher_code'] ?? null);
 
         return [
             'restaurant' => $this->getRestaurantDetails(),
@@ -108,7 +110,13 @@ class ReservationService
             ]);
         }
 
-        $pricing = $this->pricingBreakdown($date, $guests, $data['food_preference'], $data['deals_bundle_id'] ?? null);
+        $pricing = $this->pricingBreakdown(
+            $date,
+            $guests,
+            $data['food_preference'],
+            $data['deals_bundle_id'] ?? null,
+            $data['voucher_code'] ?? null
+        );
 
         return [
             'table' => $table,
@@ -127,6 +135,13 @@ class ReservationService
                 'price_per_guest' => $pricing['price_per_guest'],
                 'pricing_label' => $pricing['pricing_label'],
                 'discount_label' => $pricing['discount_label'],
+                'voucher' => $pricing['voucher'],
+                'coupon_code' => $pricing['voucher']['code'] ?? null,
+                'gst_rate' => $pricing['gst_rate'],
+                'gst_amount' => $pricing['gst_amount'],
+                'subtotal' => $pricing['subtotal'],
+                'discount_total' => $pricing['discount_total'],
+                'pre_tax_total' => $pricing['pre_tax_total'],
             ],
         ];
     }
@@ -156,9 +171,7 @@ class ReservationService
                     'meal_type' => $slot->meal_type,
                     'remaining' => $remaining,
                     'available' => $remaining > 0 && $table !== null,
-                    'status_label' => $remaining > 0 && $table !== null
-                        ? $remaining.' slot'.($remaining === 1 ? '' : 's').' left'
-                        : 'Fully booked',
+                    'status_label' => $remaining > 0 && $table !== null ? 'Available' : 'Fully booked',
                 ];
             });
     }
@@ -193,7 +206,13 @@ class ReservationService
             ->first();
     }
 
-    public function pricingBreakdown(Carbon $date, int $guests, string $foodPreference, ?int $bundleId = null): array
+    public function pricingBreakdown(
+        Carbon $date,
+        int $guests,
+        string $foodPreference,
+        ?int $bundleId = null,
+        ?string $voucherCode = null
+    ): array
     {
         $basePrice = $this->basePriceForDate($date);
         $pricePerGuest = match ($foodPreference) {
@@ -207,7 +226,9 @@ class ReservationService
 
         $subtotal = $guests * $pricePerGuest;
         $packageSummary = null;
-        $discountAmount = 0;
+        $packageDiscountAmount = 0;
+        $voucherDiscountAmount = 0;
+        $voucherSummary = null;
 
         if ($foodPreference === 'packages') {
             $package = DealsBundle::active()->find($bundleId);
@@ -219,7 +240,7 @@ class ReservationService
             }
 
             $discountPercent = (float) ($package->discount_percent ?? 0);
-            $discountAmount = round($subtotal * ($discountPercent / 100), 2);
+            $packageDiscountAmount = round($subtotal * ($discountPercent / 100), 2);
             $packageSummary = [
                 'id' => $package->id,
                 'name' => $package->name,
@@ -228,7 +249,28 @@ class ReservationService
             ];
         }
 
-        $total = max($subtotal - $discountAmount, 0);
+        $subtotalAfterPackage = max($subtotal - $packageDiscountAmount, 0);
+        $voucher = $this->resolveVoucher($voucherCode);
+
+        if ($voucher) {
+            $voucherDiscountAmount = $voucher->discount_type === 'flat'
+                ? min((float) $voucher->discount_value, $subtotalAfterPackage)
+                : round($subtotalAfterPackage * (((float) $voucher->discount_value) / 100), 2);
+
+            $voucherSummary = [
+                'id' => $voucher->id,
+                'code' => $voucher->code,
+                'discount_type' => $voucher->discount_type,
+                'discount_value' => (float) $voucher->discount_value,
+                'discount_amount' => round($voucherDiscountAmount, 2),
+            ];
+        }
+
+        $discountTotal = round($packageDiscountAmount + $voucherDiscountAmount, 2);
+        $preTaxTotal = max($subtotal - $discountTotal, 0);
+        $gstRate = (float) WebsiteSetting::get('gst_rate', 5);
+        $gstAmount = round($preTaxTotal * ($gstRate / 100), 2);
+        $total = round($preTaxTotal + $gstAmount, 2);
         $dayType = $date->isWeekend() ? 'weekend' : 'weekday';
 
         return [
@@ -236,12 +278,32 @@ class ReservationService
             'base_price' => round($basePrice, 2),
             'price_per_guest' => round($pricePerGuest, 2),
             'subtotal' => round($subtotal, 2),
-            'discount_amount' => round($discountAmount, 2),
-            'total' => round($total, 2),
+            'package_discount_amount' => round($packageDiscountAmount, 2),
+            'voucher_discount_amount' => round($voucherDiscountAmount, 2),
+            'discount_amount' => $discountTotal,
+            'discount_total' => $discountTotal,
+            'pre_tax_total' => round($preTaxTotal, 2),
+            'gst_rate' => $gstRate,
+            'gst_amount' => $gstAmount,
+            'total' => $total,
             'pricing_label' => ucfirst($dayType).' '.ucfirst(str_replace('nonveg', 'non-veg', $foodPreference)).' pricing',
-            'discount_label' => $discountAmount > 0 ? 'Package discount applied' : 'No discount applied',
+            'discount_label' => $discountTotal > 0 ? 'Discounts applied before GST' : 'No discount applied',
             'package' => $packageSummary,
+            'voucher' => $voucherSummary,
         ];
+    }
+
+    protected function resolveVoucher(?string $voucherCode): ?Voucher
+    {
+        if (blank($voucherCode)) {
+            return null;
+        }
+
+        return Voucher::query()
+            ->whereRaw('LOWER(code) = ?', [strtolower(trim($voucherCode))])
+            ->where('is_active', true)
+            ->whereDate('expiry_date', '>=', today())
+            ->first();
     }
 
     protected function basePriceForDate(Carbon $date): float

@@ -12,6 +12,7 @@ class WebsiteSettingsSeeder extends Seeder {
             ['key' => 'contact_mobile',  'value' => '9999999999',           'group' => 'general'],
             ['key' => 'address',         'value' => '123 Main St, City',    'group' => 'general'],
             ['key' => 'booking_note',    'value' => 'We look forward to hosting you!','group' => 'general'],
+            ['key' => 'gst_rate',        'value' => '5',                    'group' => 'general'],
             ['key' => 'maintenance_mode','value' => '0',                    'group' => 'system'],
             ['key' => 'email_enabled',   'value' => '0',                    'group' => 'communication'],
             ['key' => 'mail_mailer',     'value' => 'smtp',                 'group' => 'communication'],

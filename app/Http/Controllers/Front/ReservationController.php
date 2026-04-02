@@ -37,6 +37,7 @@ class ReservationController extends Controller
             'guests' => ['required', 'integer', 'min:1', 'max:20'],
             'food_preference' => ['required', Rule::in(['veg', 'nonveg', 'packages'])],
             'deals_bundle_id' => ['nullable', 'integer'],
+            'voucher_code' => ['nullable', 'string', 'max:50'],
             'ignore_booking_id' => ['nullable', 'integer'],
         ]);
 
@@ -55,6 +56,7 @@ class ReservationController extends Controller
             'guests' => ['required', 'integer', 'min:1', 'max:20'],
             'food_preference' => ['required', Rule::in(['veg', 'nonveg', 'packages'])],
             'deals_bundle_id' => ['nullable', 'integer'],
+            'voucher_code' => ['nullable', 'string', 'max:50'],
             'special_request' => ['nullable', 'string', 'max:1000'],
         ]);
 
@@ -75,6 +77,7 @@ class ReservationController extends Controller
                 'total_amount' => $prepared['pricing']['total'],
                 'status' => 'confirmed',
                 'confirmation_code' => Booking::generateConfirmationCode(),
+                'voucher_id' => $prepared['pricing']['voucher']['id'] ?? null,
                 'booking_meta' => $prepared['meta'],
             ])->load(['user', 'table', 'slot']);
         });
@@ -130,6 +133,7 @@ class ReservationController extends Controller
             'email' => $booking->booking_meta['contact']['email'] ?? $booking->user?->email ?? '',
             'mobile' => $booking->booking_meta['contact']['mobile'] ?? $booking->user?->mobile ?? '',
             'special_request' => $booking->booking_meta['special_request'] ?? null,
+            'voucher_code' => $booking->booking_meta['coupon_code'] ?? null,
             'ignore_booking_id' => $booking->id,
         ];
 
@@ -141,6 +145,7 @@ class ReservationController extends Controller
             'booking_date' => $validated['date'],
             'meal_type' => $validated['meal_type'],
             'total_amount' => $prepared['pricing']['total'],
+            'voucher_id' => $prepared['pricing']['voucher']['id'] ?? null,
             'booking_meta' => array_merge($booking->booking_meta ?? [], $prepared['meta']),
             'status' => 'confirmed',
         ]);

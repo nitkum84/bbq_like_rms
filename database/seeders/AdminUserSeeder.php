@@ -11,8 +11,8 @@ class AdminUserSeeder extends Seeder {
         Role::firstOrCreate(['name' => 'super-admin']);
         Role::firstOrCreate(['name' => 'user']);
 
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@gmail.com'],
+        $admin = User::updateOrCreate(
+            ['email' => 'admin@gamil.com'],
             [
                 'name'     => 'Super Admin',
                 'mobile'   => '9999999999',
@@ -22,6 +22,6 @@ class AdminUserSeeder extends Seeder {
             ]
         );
         $admin->assignRole('super-admin');
-        $this->command->info('Admin created: admin@gmail.com / 12345678');
+        $this->command->info('Admin created: admin@gamil.com / 12345678');
     }
 }

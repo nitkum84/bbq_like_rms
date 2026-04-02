@@ -10,7 +10,7 @@
                 <div>
                     <p class="section-kicker">Front User Dashboard</p>
                     <h1>Welcome back, {{ $user->name }}</h1>
-                    <p>Track your upcoming tables, verify your contact details, and keep your dining profile ready for the next booking.</p>
+                    <p>Track your upcoming bookings, verify your contact details, and keep your dining profile ready for the next visit.</p>
                 </div>
                 <div class="user-dashboard-stats">
                     <article>
@@ -64,7 +64,7 @@
                 <div class="user-dashboard-grid">
                     <aside class="user-dashboard-sidebar" data-dashboard-tabs role="tablist" aria-label="Dashboard sections">
                         <button type="button" id="dashboard-tab-profile" data-dashboard-tab="profile" role="tab" aria-controls="profile" aria-selected="true">My Profile</button>
-                        <button type="button" id="dashboard-tab-reservations" data-dashboard-tab="reservations" role="tab" aria-controls="reservations" aria-selected="false">Reservations</button>
+                        <button type="button" id="dashboard-tab-bookings" data-dashboard-tab="bookings" role="tab" aria-controls="bookings" aria-selected="false">My Bookings</button>
                         <button type="button" id="dashboard-tab-rewards" data-dashboard-tab="rewards" role="tab" aria-controls="rewards" aria-selected="false">Rewards</button>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -119,10 +119,10 @@
                             </dl>
                         </section>
 
-                        <section class="user-dashboard-panel" id="reservations" data-dashboard-panel="reservations" role="tabpanel" aria-labelledby="dashboard-tab-reservations" hidden>
+                        <section class="user-dashboard-panel" id="bookings" data-dashboard-panel="bookings" role="tabpanel" aria-labelledby="dashboard-tab-bookings" hidden>
                             <div class="user-dashboard-panel__header">
                                 <div>
-                                    <p class="section-kicker">Reservations</p>
+                                    <p class="section-kicker">Bookings</p>
                                     <h2>Your booking history</h2>
                                 </div>
                                 <a class="button button--ghost-dark" href="{{ route('home') }}#booking-cta">Book another table</a>
@@ -146,10 +146,6 @@
                                             <div>
                                                 <dt>Meal</dt>
                                                 <dd>{{ ucfirst($booking->meal_type) }}</dd>
-                                            </div>
-                                            <div>
-                                                <dt>Table</dt>
-                                                <dd>{{ $booking->table?->table_number ?? 'Assigned on arrival' }}</dd>
                                             </div>
                                             <div>
                                                 <dt>Total</dt>

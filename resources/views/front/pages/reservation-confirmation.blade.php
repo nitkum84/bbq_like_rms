@@ -80,6 +80,12 @@
                     @if (! empty($booking->booking_meta['package']['name'] ?? null))
                         <li><span>Package</span><strong>{{ $booking->booking_meta['package']['name'] }}</strong></li>
                     @endif
+                    @if (! empty($booking->booking_meta['coupon_code'] ?? null))
+                        <li><span>Coupon</span><strong>{{ $booking->booking_meta['coupon_code'] }}</strong></li>
+                    @endif
+                    @if (! empty($booking->booking_meta['gst_amount'] ?? null))
+                        <li><span>GST</span><strong>Rs. {{ number_format((float) ($booking->booking_meta['gst_amount'] ?? 0), 2) }}</strong></li>
+                    @endif
                     @if (! empty($booking->booking_meta['special_request'] ?? null))
                         <li><span>Request</span><strong>{{ $booking->booking_meta['special_request'] }}</strong></li>
                     @endif

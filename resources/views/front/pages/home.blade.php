@@ -99,6 +99,8 @@
                         <p>{{ $service['description'] }}</p>
                         @if ($service['title'] === 'Reserve Table')
                             <button class="button button--ghost-dark service-card__action" type="button" data-reservation-open>Reserve Table</button>
+                        @elseif ($service['title'] === 'Catering')
+                            <a class="button button--ghost-dark service-card__action" href="{{ route('enquiries.create') }}">Send Enquiry</a>
                         @endif
                     </article>
                 @endforeach
@@ -110,19 +112,23 @@
         <div class="container feature-strip__grid">
             <div class="feature-strip__content">
                 <p class="section-kicker">Happiness Cards</p>
-                <h2>Give reward-led dining a premium spotlight on a lighter, more polished homepage.</h2>
-                <p>Use this section to sell gifting, stored value, faster repeat visits, member benefits, and occasion planning without pushing it into a secondary menu.</p>
+                <h2>Give reward-led dining a premium spotlight with live card offers and member-led stories.</h2>
+                <p>These cards are now fetched from the admin highlights module, so the homepage stays synced with the offers and benefits your team is actively promoting.</p>
                 <div class="feature-strip__actions">
-                    <a class="button button--solid" href="#">Explore Card Options</a>
-                    <a class="button button--ghost-dark" href="#">See Member Benefits</a>
+                    <a class="button button--solid" href="{{ route('happiness-cards.index') }}">Explore Card Options</a>
+                    <a class="button button--ghost-dark" href="{{ route('happiness-cards.index') }}">See Member Benefits</a>
                 </div>
             </div>
 
             <div class="feature-strip__media">
-                <img src="{{ asset('images/best-food-img-1.png') }}" alt="Happiness card meal visual">
+                @if ($happinessCards->isNotEmpty())
+                    <img src="{{ $happinessCards->first()->image ? asset('storage/' . $happinessCards->first()->image) : asset('images/best-food-img-1.png') }}" alt="{{ $happinessCards->first()->title }}">
+                @else
+                    <img src="{{ asset('images/best-food-img-1.png') }}" alt="Happiness card meal visual">
+                @endif
                 <div class="feature-strip__badge">
-                    <strong>Gift-ready</strong>
-                    <span>Ideal for birthdays, teams, and festive dining credits.</span>
+                    <strong>{{ $happinessCards->first()->title ?? 'Gift-ready' }}</strong>
+                    <span>{{ $happinessCards->first()->description ?? 'Ideal for birthdays, teams, and festive dining credits.' }}</span>
                 </div>
             </div>
         </div>
@@ -156,7 +162,7 @@
                     <p class="section-kicker">Sizzling Deals</p>
                     <h2>Promotions should feel active, selective, and easy to compare at a glance.</h2>
                 </div>
-                <button class="button button--solid" type="button" data-reservation-open>Reserve With A Deal</button>
+                <a class="button button--solid" href="{{ route('deals.index') }}">Explore Deals</a>
             </div>
 
             <div class="deals__grid">
@@ -165,6 +171,12 @@
                         <span>{{ $deal['badge'] }}</span>
                         <h3>{{ $deal['title'] }}</h3>
                         <p>{{ $deal['description'] }}</p>
+                        @if (!empty($deal['id']))
+                            <div class="deal-card__actions">
+                                <a href="{{ route('deals.show', $deal['id']) }}">View deal</a>
+                                <button type="button" data-reservation-open data-deal-id="{{ $deal['id'] }}">Book with offer</button>
+                            </div>
+                        @endif
                     </article>
                 @endforeach
             </div>
@@ -178,19 +190,28 @@
                     <p class="section-kicker">Latest Updates</p>
                     <h2>Keep the homepage feeling current between offers, events, and seasonal pushes.</h2>
                 </div>
-                <a class="button button--ghost-dark" href="#">Visit Blog</a>
+                <a class="button button--ghost-dark" href="{{ route('blogs.index') }}">Visit Blog</a>
             </div>
 
             <div class="updates__grid">
                 @foreach ($blogs as $blog)
-                    <article class="update-card">
-                        <img src="{{ asset('images/' . ($blog['image'] ?? $blog->image ?? 'post-1.jpg')) }}" alt="{{ $blog['title'] ?? $blog->title }}">
+                    @php
+                        $blogTitle = $blog['title'] ?? $blog->title;
+                        $blogImage = $blog['image'] ?? $blog->image ?? null;
+                        $blogDate = $blog['created_at'] ?? $blog->created_at ?? null;
+                        $blogImageUrl = $blogImage
+                            ? (str_starts_with($blogImage, 'post-') ? asset('images/' . $blogImage) : asset('storage/' . $blogImage))
+                            : asset('images/post-1.jpg');
+                    @endphp
+                    @php($blogUrl = !empty($blog->slug) ? route('blogs.show', $blog->slug) : route('blogs.index'))
+                    <a class="update-card update-card--link" href="{{ $blogUrl }}">
+                        <img src="{{ $blogImageUrl }}" alt="{{ $blogTitle }}">
                         <div>
-                            <p>{{ optional($blog['created_at'] ?? $blog->created_at)->format('d M Y') }}</p>
-                            <h3>{{ $blog['title'] ?? $blog->title }}</h3>
-                            <a href="#">Read update</a>
+                            <p>{{ optional($blogDate)->format('d M Y') }}</p>
+                            <h3>{{ $blogTitle }}</h3>
+                            <span class="update-card__cta">Read update</span>
                         </div>
-                    </article>
+                    </a>
                 @endforeach
             </div>
         </div>
@@ -212,12 +233,13 @@
             <form class="reservation-form" method="POST" action="{{ $reservationBootstrap['storeUrl'] }}" data-reservation-form data-reservation-bootstrap='@json($reservationBootstrap)'>
                 @csrf
                 <input type="hidden" name="slot_id" value="">
+                <input type="hidden" name="voucher_code" value="{{ $reservationBootstrap['defaultVoucherCode'] }}">
 
                 <div class="reservation-form__grid">
                     <section class="reservation-card">
                         <div class="reservation-card__header">
                             <h3>1. Plan your visit</h3>
-                            <p>Select the date, meal, and live slot availability.</p>
+                            <p>Select the date, meal, and currently available time.</p>
                         </div>
 
                         <label class="reservation-field">
@@ -265,10 +287,23 @@
                             </select>
                         </label>
 
+                        <label class="reservation-field">
+                            <span>Apply Coupon</span>
+                            <input type="text" name="coupon_code_display" data-coupon-input placeholder="Enter coupon code">
+                        </label>
+
                         <div class="reservation-price-panel" data-price-panel>
                             <div>
                                 <span>Price per guest</span>
                                 <strong data-price-per-guest>Rs. 0.00</strong>
+                            </div>
+                            <div>
+                                <span>Discount</span>
+                                <strong data-discount-total>Rs. 0.00</strong>
+                            </div>
+                            <div>
+                                <span>GST</span>
+                                <strong data-gst-total>Rs. 0.00</strong>
                             </div>
                             <div>
                                 <span>Total amount</span>
@@ -327,6 +362,10 @@
                             <div>
                                 <dt>Food selection</dt>
                                 <dd data-summary-food>{{ ucfirst($reservationBootstrap['defaultFoodPreference']) }}</dd>
+                            </div>
+                            <div>
+                                <dt>Coupon</dt>
+                                <dd data-summary-coupon>Not applied</dd>
                             </div>
                             <div>
                                 <dt>Total</dt>
